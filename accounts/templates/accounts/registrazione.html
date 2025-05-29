@@ -85,10 +85,17 @@
 </head>
 
 <body>
-    <div class="header">
-        <div>Sistema provinciale di monitoraggio sfiori</div>
+  <div class="header d-flex justify-content-center align-items-center position-relative px-4">
+    <!-- Pulsante freccia indietro a sinistra con margine -->
+    <a href="{% url 'login' %}" class="btn btn-light rounded-circle position-absolute" style="left: 15px;">
+        &#8592;
+    </a>
+    <!-- Titolo centrale -->
+    <div class="text-center">
+        <div><strong>Sistema provinciale di monitoraggio sfiori</strong></div>
         <div>Provincia di Mantova</div>
     </div>
+</div>
 
     <div class="logo-top">
         <img src="{% static 'provincia_mantova.png' %}" alt="Logo Provincia">
