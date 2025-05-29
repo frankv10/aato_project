@@ -1,0 +1,131 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+
+        .header {
+            background-color: #c40000;
+            color: white;
+            padding: 10px 0;
+            text-align: center;
+        }
+
+        .logo-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+        }
+
+        .logo-top img {
+            height: 120px;
+        }
+
+        .login-box {
+            max-width: 400px;
+            margin: 40px auto;
+            padding: 30px;
+            background: white;
+            border-radius: 12px;
+            animation: slideInDown 0.8s ease-out;
+        }
+
+        .login-box h2 {
+            text-align: center;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            font-weight: bold;
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            border-radius: 30px;
+            border: 1px solid #ccc;
+            padding: 10px 20px;
+            transition: all 0.3s ease;
+            box-shadow: none;
+        }
+
+        input[type="text"]:focus,
+        input[type="password"]:focus {
+            outline: none;
+            border-color: #005bff;
+            box-shadow: 0 0 5px rgba(0, 91, 255, 0.3);
+        }
+
+        .btn-login {
+            background-color: #005bff;
+            color: white;
+            width: 100%;
+            border-radius: 30px;
+            padding: 10px;
+        }
+
+        @keyframes slideInDown {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <div>Sistema provinciale di monitoraggio sfiori</div>
+        <div>Provincia di Mantova</div>
+    </div>
+
+    <div class="logo-top">
+        <img src="{% static 'provincia_mantova.png' %}" alt="Logo Provincia">
+        <img src="{% static 'mappa.jpg' %}" alt="Mappa Mantova" width="150">
+    </div>
+
+    <div class="login-box shadow">
+        <h2>Login</h2>
+        {% if messages %}
+            {% for message in messages %}
+                <p class="text-danger">{{ message }}</p>
+            {% endfor %}
+        {% endif %}
+        <form method="post">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="username" class="form-label">Utente</label>
+                <input type="text" name="username" class="form-control" placeholder="Inserisci il nome utente">
+            </div>
+            <div class="mb-3">
+                <label for="password" class="form-label">Password</label>
+                <div class="input-group">
+                    <input type="password" name="password" id="passwordField" class="form-control">
+                    <button type="button" class="btn btn-outline-secondary" onclick="togglePassword()">Mostra</button>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-login">Entra</button>
+        </form>
+    </div>
+
+    <script>
+        function togglePassword() {
+            var field = document.getElementById("passwordField");
+            field.type = field.type === "password" ? "text" : "password";
+        }
+    </script>
+</body>
+</html>
