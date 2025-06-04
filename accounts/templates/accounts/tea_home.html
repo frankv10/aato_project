@@ -1,0 +1,90 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>Home</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+
+        .header {
+            background-color: #c40000;
+            color: white;
+            padding: 10px 0;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .logo-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 60px;
+        }
+
+        .logo-top img {
+            height: 120px;
+        }
+
+        .main-box {
+            max-width: 500px;
+            margin: 40px auto;
+            padding: 30px;
+            background: white;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            animation: slideInDown 0.8s ease-out;
+        }
+
+        .main-box h2 {
+            font-size: 2em;
+            margin-bottom: 30px;
+        }
+
+        .big-button {
+            font-size: 1.2rem;
+            padding: 14px;
+            border-radius: 25px;
+            margin-bottom: 15px;
+            width: 100%;
+        }
+
+        @keyframes slideInDown {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        Sistema provinciale di monitoraggio sfiori<br>Provincia di Mantova
+    </div>
+
+    <div class="logo-top">
+        <img src="{% static 'provincia_mantova.png' %}" alt="Logo Provincia">
+        <img src="{% static 'mappa.jpg' %}" alt="Mappa Mantova" width="150">
+    </div>
+
+    <div class="main-box">
+        <h2>Benvenuto {{user.username}}</h2>
+
+        <a href="#" class="btn btn-primary big-button">Nuovo manufatto</a>
+        <a href="#" class="btn btn-success big-button">Lista manufatti</a>
+        <a href="#" class="btn btn-warning big-button">Visualizza mappa</a>
+        <a href="{% url 'login' %}" class="btn btn-danger rounded-pill">Esci</a>
+    </div>
+</body>
+</html>

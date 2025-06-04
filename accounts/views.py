@@ -1,9 +1,10 @@
 from django.contrib.auth import authenticate, login
-from django.core.checks import messages
+from django.contrib import messages
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
 from .forms import UserProfiloForm
 from .models import Profilo
+from django.contrib.auth import logout
 
 
 def login_view(request):
@@ -15,13 +16,22 @@ def login_view(request):
             login(request, user)
             ente = user.profilo.ente  # accede al campo ente
             if ente == 'AATO':
-                return redirect('dashboard_aato')
+                return redirect('aato')
             elif ente == 'TEA':
-                return redirect('dashboard_tea')
+                return redirect('tea')
         else:
             messages.error(request, 'Credenziali non valide.')
     return render(request, 'accounts/login.html')
 
+def tea_view(request):
+    return render(request, 'accounts/tea_home.html')
+
+def aato_view(request):
+    return render(request, 'accounts/aato_home.html')
+
+def logout_view(request):
+    logout(request)
+    return redirect('login')
 
 def registra_utente(request):
     if request.method == 'POST':

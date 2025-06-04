@@ -17,13 +17,15 @@
             color: white;
             padding: 10px 0;
             text-align: center;
+            font-weight: bold;
+            position: relative;
         }
 
         .logo-top {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 10px 0;
+            padding: 20px 60px;
         }
 
         .logo-top img {
@@ -37,12 +39,13 @@
             background: white;
             border-radius: 12px;
             animation: slideInDown 0.8s ease-out;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
         }
 
         .register-box h2 {
             text-align: center;
-            font-size: 2.5em;
-            margin-bottom: 20px;
+            font-size: 2.2em;
+            margin-bottom: 25px;
         }
 
         input[type="text"],
@@ -71,6 +74,22 @@
             padding: 10px;
         }
 
+        .btn-back {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: white;
+            border: none;
+            font-size: 1.5rem;
+            padding: 5px 12px;
+            border-radius: 50%;
+            text-decoration: none;
+            color: #c40000;
+            font-weight: bold;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+        }
+
         @keyframes slideInDown {
             from {
                 transform: translateY(-50px);
@@ -85,23 +104,19 @@
 </head>
 
 <body>
-  <div class="header d-flex justify-content-center align-items-center position-relative px-4">
-    <!-- Pulsante freccia indietro a sinistra con margine -->
-    <a href="{% url 'login' %}" class="btn btn-light rounded-circle position-absolute" style="left: 15px;">
-        &#8592;
-    </a>
-    <!-- Titolo centrale -->
-    <div class="text-center">
-        <div><strong>Sistema provinciale di monitoraggio sfiori</strong></div>
-        <div>Provincia di Mantova</div>
+    <!-- Header con titolo e pulsante indietro -->
+    <div class="header">
+        <a href="{% url 'login' %}" class="btn-back">&#8592;</a>
+        Sistema provinciale di monitoraggio sfiori<br>Provincia di Mantova
     </div>
-</div>
 
+    <!-- Loghi -->
     <div class="logo-top">
         <img src="{% static 'provincia_mantova.png' %}" alt="Logo Provincia">
         <img src="{% static 'mappa.jpg' %}" alt="Mappa Mantova" width="150">
     </div>
 
+    <!-- Box registrazione -->
     <div class="register-box shadow">
         <h2>Registrazione</h2>
         <form method="post">
