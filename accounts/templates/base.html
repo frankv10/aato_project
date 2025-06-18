@@ -33,18 +33,26 @@
 
         .btn-back {
             position: absolute;
-            left: 15px;
             top: 50%;
+            left: 15px;
             transform: translateY(-50%);
             background: white;
-            border: none;
-            font-size: 1.5rem;
-            padding: 5px 12px;
-            border-radius: 50%;
-            text-decoration: none;
             color: #c40000;
+            font-size: 1.5rem;
+            text-decoration: none;
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             font-weight: bold;
             box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-back:hover {
+            background-color: #ffe5e5;
+            color: #a00000;
         }
 
         @keyframes slideInDown {
@@ -61,7 +69,7 @@
 </head>
 <body>
     <div class="header">
-        <a href="{% url 'login' %}" class="btn-back">&#8592;</a>
+        {% block back_button %}{% endblock %}
         Sistema provinciale di monitoraggio sfiori<br>Provincia di Mantova
     </div>
 

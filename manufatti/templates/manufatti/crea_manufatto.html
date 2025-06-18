@@ -1,6 +1,10 @@
 {% extends "base.html" %}
 {% load static %}
 
+{% block back_button %}
+<a href="#" onclick="history.back();" class="btn-back" title="Torna indietro">&#8592;</a>
+{% endblock %}
+
 {% block title %}Nuovo Manufatto{% endblock %}
 
 {% block content %}
