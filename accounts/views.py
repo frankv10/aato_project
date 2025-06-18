@@ -1,10 +1,12 @@
 from django.contrib.auth import authenticate, login
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
 from .forms import UserProfiloForm
-from .models import Profilo
 from django.contrib.auth import logout
+
+from .models import Profilo
 
 
 def login_view(request):
@@ -52,3 +54,5 @@ def registra_utente(request):
     else:
         form = UserProfiloForm()
     return render(request, 'accounts/registrazione.html', {'form': form})
+
+

@@ -1,148 +1,106 @@
+{% extends "base.html" %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="it">
-<head>
-    <meta charset="UTF-8">
-    <title>Registrazione</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- Bootstrap -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body {
-            background-color: #f8f9fa;
+
+{% block title %}Registrazione{% endblock %}
+
+{% block content
+
+<div class="register-box shadow">
+    <h2>Registrazione</h2>
+    <form method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+            {{ form.first_name.label_tag }}
+            {{ form.first_name }}
+        </div>
+        <div class="mb-3">
+            {{ form.last_name.label_tag }}
+            {{ form.last_name }}
+        </div>
+        <div class="mb-3">
+            {{ form.username.label_tag }}
+            {{ form.username }}
+        </div>
+        <div class="mb-3">
+            {{ form.password.label_tag }}
+            {{ form.password }}
+        </div>
+        <div class="mb-3">
+            {{ form.ente.label_tag }}
+            {{ form.ente }}
+        </div>
+        <button type="submit" class="btn btn-primary">Registrati</button>
+    </form>
+</div>
+
+<style>
+    .register-box {
+        max-width: 500px;
+        margin: 40px auto;
+        padding: 30px;
+        background: white;
+        border-radius: 12px;
+        animation: slideInDown 0.8s ease-out;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .register-box h2 {
+        text-align: center;
+        font-size: 2.2em;
+        margin-bottom: 25px;
+    }
+
+    input[type="text"],
+    input[type="password"],
+    select,
+    textarea {
+        border-radius: 30px;
+        border: 1px solid #ccc;
+        padding: 10px 20px;
+        transition: all 0.3s ease;
+        box-shadow: none;
+    }
+
+    input[type="text"]:focus,
+    input[type="password"]:focus,
+    select:focus,
+    textarea:focus {
+        outline: none;
+        border-color: #005bff;
+        box-shadow: 0 0 5px rgba(0, 91, 255, 0.3);
+    }
+
+    .btn-primary {
+        width: 100%;
+        border-radius: 30px;
+        padding: 10px;
+    }
+
+    .btn-back {
+        position: absolute;
+        left: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: white;
+        border: none;
+        font-size: 1.5rem;
+        padding: 5px 12px;
+        border-radius: 50%;
+        text-decoration: none;
+        color: #c40000;
+        font-weight: bold;
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+    }
+
+    @keyframes slideInDown {
+        from {
+            transform: translateY(-50px);
+            opacity: 0;
         }
-
-        .header {
-            background-color: #c40000;
-            color: white;
-            padding: 10px 0;
-            text-align: center;
-            font-weight: bold;
-            position: relative;
+        to {
+            transform: translateY(0);
+            opacity: 1;
         }
-
-        .logo-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px 60px;
-        }
-
-        .logo-top img {
-            height: 120px;
-        }
-
-        .register-box {
-            max-width: 500px;
-            margin: 40px auto;
-            padding: 30px;
-            background: white;
-            border-radius: 12px;
-            animation: slideInDown 0.8s ease-out;
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .register-box h2 {
-            text-align: center;
-            font-size: 2.2em;
-            margin-bottom: 25px;
-        }
-
-        input[type="text"],
-        input[type="password"],
-        select,
-        textarea {
-            border-radius: 30px;
-            border: 1px solid #ccc;
-            padding: 10px 20px;
-            transition: all 0.3s ease;
-            box-shadow: none;
-        }
-
-        input[type="text"]:focus,
-        input[type="password"]:focus,
-        select:focus,
-        textarea:focus {
-            outline: none;
-            border-color: #005bff;
-            box-shadow: 0 0 5px rgba(0, 91, 255, 0.3);
-        }
-
-        .btn-primary {
-            width: 100%;
-            border-radius: 30px;
-            padding: 10px;
-        }
-
-        .btn-back {
-            position: absolute;
-            left: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: white;
-            border: none;
-            font-size: 1.5rem;
-            padding: 5px 12px;
-            border-radius: 50%;
-            text-decoration: none;
-            color: #c40000;
-            font-weight: bold;
-            box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
-        }
-
-        @keyframes slideInDown {
-            from {
-                transform: translateY(-50px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-    </style>
-</head>
-
-<body>
-    <!-- Header con titolo e pulsante indietro -->
-    <div class="header">
-        <a href="{% url 'login' %}" class="btn-back">&#8592;</a>
-        Sistema provinciale di monitoraggio sfiori<br>Provincia di Mantova
-    </div>
-
-    <!-- Loghi -->
-    <div class="logo-top">
-        <img src="{% static 'provincia_mantova.png' %}" alt="Logo Provincia">
-        <img src="{% static 'mappa.jpg' %}" alt="Mappa Mantova" width="150">
-    </div>
-
-    <!-- Box registrazione -->
-    <div class="register-box shadow">
-        <h2>Registrazione</h2>
-        <form method="post">
-            {% csrf_token %}
-            <div class="mb-3">
-                {{ form.first_name.label_tag }}
-                {{ form.first_name }}
-            </div>
-            <div class="mb-3">
-                {{ form.last_name.label_tag }}
-                {{ form.last_name }}
-            </div>
-            <div class="mb-3">
-                {{ form.username.label_tag }}
-                {{ form.username }}
-            </div>
-            <div class="mb-3">
-                {{ form.password.label_tag }}
-                {{ form.password }}
-            </div>
-            <div class="mb-3">
-                {{ form.ente.label_tag }}
-                {{ form.ente }}
-            </div>
-            <button type="submit" class="btn btn-primary">Registrati</button>
-        </form>
-    </div>
-</body>
-</html>
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Nuovo Manufatto{% endblock %}
+
+{% block content %}
+<div class="main-box" style="
+    max-width: 500px;
+    margin: 40px auto;
+    padding: 30px;
+    background: white;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    animation: slideInDown 0.8s ease-out;
+">
+    <h2 style="font-size: 2em; margin-bottom: 30px;">Creazione manufatto</h2>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <div class="text-start mb-2">
+            <label for="nome" class="form-label"><strong>Nome sfioro:</strong></label>
+            <input type="text" class="form-control" id="nome" name="nome" placeholder="Inserisci il nome" required>
+        </div>
+
+        <button type="button" class="big-button btn btn-outline-secondary w-100 mb-3 py-3 rounded">INFO IDRICHE</button>
+        <button type="button" class="big-button btn btn-outline-secondary w-100 mb-3 py-3 rounded">INFO GEOGRAFICHE</button>
+
+        <div class="form-row mt-3 d-flex justify-content-between align-items-center gap-3">
+            <div class="flex-grow-1">
+                <label for="stato" class="form-label"><strong>STATO</strong></label>
+                <select class="form-select" id="stato" name="stato">
+                    <option value="PROGRAMMATO">PROGRAMMATO</option>
+                    <option value="IN CORSO">IN CORSO</option>
+                    <option value="COMPLETATO">COMPLETATO</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary mt-4">SALVA</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

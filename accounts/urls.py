@@ -7,4 +7,5 @@ urlpatterns = [
     path("tea/",views.tea_view,name="tea"),
     path("aato/",views.aato_view,name="aato"),
     path('logout/', views.logout_view, name='logout'),
+
 ]
