@@ -12,3 +12,20 @@ class Manufatto(models.Model):
 
     def __str__(self):
         return self.nome
+
+class info_idriche(models.Model):
+    manufatto = models.ForeignKey('Manufatto', on_delete=models.CASCADE, related_name='info_idriche')
+    portata = models.FloatField(null=True, blank=True)
+    pressione = models.FloatField(null=True, blank=True)
+
+    def __str__(self):
+        return f"Info idriche di {self.manufatto.nome}"
+
+
+class info_geografiche(models.Model):
+    manufatto = models.ForeignKey('Manufatto', on_delete=models.CASCADE, related_name='info_grografiche')
+    latitudine = models.FloatField(null=True, blank=True)
+    longitudine = models.FloatField(null=True, blank=True)
+
+    def __str__(self):
+        return f"info geografiche {self.manufatto.nome}"
