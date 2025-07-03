@@ -1,0 +1,65 @@
+{% extends "accounts/base.html" %}
+{% load static %}
+{% block content %}
+<div class="main-box">
+    <h2 class="text-primary mb-3">{{ manufatto.nome }}</h2>
+
+    <p><strong>Stato:</strong> {{ manufatto.stato }}</p>
+    <p><strong>Data creazione:</strong> {{ manufatto.data_creazione }}</p>
+
+    <hr>
+
+    <h4 class="text-secondary">Info Idriche</h4>
+    {% if idriche %}
+    <ul class="list-group mb-3">
+      {% for info in idriche %}
+      <li class="list-group-item">
+        <strong>Portata:</strong> {{ info.portata }} |
+        <strong>Pressione:</strong> {{ info.pressione }}
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="text-muted">Nessuna info idrica disponibile.</p>
+    {% endif %}
+
+    <h4 class="text-secondary">Info Geografiche</h4>
+    {% if geografiche %}
+    <ul class="list-group mb-3">
+      {% for geo in geografiche %}
+      <li class="list-group-item">
+        <strong>Latitudine:</strong> {{ geo.latitudine }} |
+        <strong>Longitudine:</strong> {{ geo.longitudine }}
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="text-muted">Nessuna info geografica disponibile.</p>
+    {% endif %}
+
+    <a href="{% url 'lista_manufatti' %}" class="btn btn-outline-primary rounded-pill mt-4">⬅ Torna alla lista</a>
+</div>
+
+<style>
+    .main-box {
+        max-width: 600px;
+        margin: 40px auto;
+        padding: 30px;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+        animation: slideInDown 0.8s ease-out;
+    }
+
+    @keyframes slideInDown {
+        from {
+            transform: translateY(-40px);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+</style>
+{% endblock %}

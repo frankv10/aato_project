@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 
 from .forms import ManufattoForm, InfoIdricheForm, InfoGeograficheForm
@@ -38,4 +38,14 @@ from .models import Manufatto
 @login_required
 def lista_manufatti(request):
     manufatti = Manufatto.objects.all()
-    return render(request, 'manufatti/lista_manufatti.html', {'manufatti': manufatti})
+    return render(request, 'manufatti/lista_manufatti.html',  {'manufatti': manufatti})
+
+def dettaglio_manufatto(request, manufatto_id):
+    manufatto = get_object_or_404(Manufatto, id=manufatto_id)
+    idriche = manufatto.info_idriche.all()
+    geografiche = manufatto.info_geografiche.all()
+    return render(request, 'manufatti/dettaglio_manufatto.html', {
+        'manufatto': manufatto,
+        'idriche': idriche,
+        'geografiche': geografiche,
+    })

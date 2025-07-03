@@ -23,7 +23,7 @@ class info_idriche(models.Model):
 
 
 class info_geografiche(models.Model):
-    manufatto = models.ForeignKey('Manufatto', on_delete=models.CASCADE, related_name='info_grografiche')
+    manufatto = models.ForeignKey('Manufatto', on_delete=models.CASCADE, related_name='info_geografiche')
     latitudine = models.FloatField(null=True, blank=True)
     longitudine = models.FloatField(null=True, blank=True)
 

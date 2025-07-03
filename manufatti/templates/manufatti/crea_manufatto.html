@@ -1,9 +1,5 @@
-{% extends "base.html" %}
+{% extends "accounts/base.html" %}
 {% load static %}
-
-{% block back_button %}
-<a href="#" onclick="history.back();" class="btn-back" title="Torna indietro">&#8592;</a>
-{% endblock %}
 
 {% block title %}Nuovo Manufatto{% endblock %}
 
@@ -28,7 +24,7 @@
         {{ form_manufatto.as_p }}
 
         <!-- Bottone INFO IDRICHE -->
-        <button type="button" class="btn btn-outline-secondary w-100 mb-3 py-3 rounded"
+        <button type="button" class="btn btn-outline-secondary w-100 mb-3 py-3"
                 onclick="toggleSection('info-idriche')">INFO IDRICHE</button>
 
         <!-- Sezione IDRICHE -->
@@ -37,7 +33,7 @@
         </div>
 
         <!-- Bottone INFO GEOGRAFICHE -->
-        <button type="button" class="btn btn-outline-secondary w-100 mb-3 py-3 rounded"
+        <button type="button" class="btn btn-outline-secondary w-100 mb-3 py-3"
                 onclick="toggleSection('info-geografiche')">INFO GEOGRAFICHE</button>
 
         <!-- Sezione GEO -->
@@ -48,6 +44,9 @@
         <!-- Salva -->
         <button type="submit" class="btn btn-primary w-100 mt-4">SALVA</button>
     </form>
+
+    <!-- Torna alla lista -->
+    <a href="{% url 'lista_manufatti' %}" class="btn btn-outline-primary w-100 mt-3">⬅ Torna alla lista</a>
 </div>
 
 <!-- Script per toggle -->
