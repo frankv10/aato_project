@@ -49,3 +49,20 @@ def dettaglio_manufatto(request, manufatto_id):
         'idriche': idriche,
         'geografiche': geografiche,
     })
+@login_required
+def modifica_manufatto(request, pk):
+    manufatto = get_object_or_404(Manufatto, pk=pk)
+
+    if request.method == 'POST':
+        form_manufatto = ManufattoForm(request.POST, instance=manufatto)
+        if form_manufatto.is_valid():
+            form_manufatto.save()
+            return redirect('lista_manufatti')
+    else:
+        form_manufatto = ManufattoForm(instance=manufatto)
+
+    return render(request, 'manufatti/modifica_manufatto.html', {
+        'form_manufatto': form_manufatto,
+        'manufatto': manufatto,
+    })
+
