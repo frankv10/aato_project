@@ -1,0 +1,58 @@
+{% extends "accounts/base.html" %}
+{% block title %}Modifica Manufatto{% endblock %}
+
+{% block content %}
+<div class="main-box" style="
+    max-width: 600px;
+    margin: 40px auto;
+    padding: 30px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    animation: slideInDown 0.8s ease-out;
+">
+    <h2 class="text-primary mb-4">Modifica Manufatto</h2>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <!-- Sezione Manufatto -->
+        <h4 class="text-start mb-2">Manufatto</h4>
+        {{ form_manufatto.as_p }}
+
+        <!-- Bottone INFO IDRAULICHE -->
+        <button type="button" class="btn btn-outline-secondary w-100 mb-3 py-3"
+                onclick="toggleSection('info-idriche')">INFO IDRAULICHE</button>
+
+        <div id="info-idriche" style="display: none;" class="text-start mb-3">
+            {{ form_idriche.as_p }}
+        </div>
+
+        <!-- Bottone INFO GEOGRAFICHE -->
+        <button type="button" class="btn btn-outline-secondary w-100 mb-3 py-3"
+                onclick="toggleSection('info-geografiche')">INFO GEOGRAFICHE</button>
+
+        <div id="info-geografiche" style="display: none;" class="text-start mb-3">
+            {{ form_geografiche.as_p }}
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100 mt-4"> Salva modifiche</button>
+    </form>
+
+    <a href="{% url 'lista_manufatti' %}" class="btn btn-outline-secondary w-100 mt-3">⬅ Torna alla lista</a>
+</div>
+
+<script>
+function toggleSection(id) {
+    const section = document.getElementById(id);
+    section.style.display = section.style.display === "none" ? "block" : "none";
+}
+</script>
+
+<style>
+@keyframes slideInDown {
+  from { transform: translateY(-30px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+</style>
+{% endblock %}
