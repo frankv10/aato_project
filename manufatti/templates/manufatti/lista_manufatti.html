@@ -3,22 +3,43 @@
 <div class="container mt-5">
   <div class="d-flex justify-content-between align-items-center mb-4">
     <h2 class="text-primary">LISTA MANUFATTI</h2>
-    <a href="{% url 'crea_manufatto' %}" class="btn btn-success">➕ Crea nuovo</a>
+    <a href="{% url 'crea_manufatto' %}" class="btn btn-success rounded-pill">➕ Crea nuovo</a>
   </div>
+
+  <!-- FORM DI RICERCA -->
+  <form method="GET" action="{% url 'lista_manufatti' %}" class="mb-4">
+    <div class="input-group shadow-sm rounded-pill">
+      <input type="text" name="query" class="form-control rounded-start-pill" placeholder="Cerca manufatto per nome o stato..." value="{{ query|default:'' }}">
+      <button class="btn btn-primary" type="submit">Cerca</button>
+      {% if query %}
+        <!-- Pulsante per resettare la ricerca, visibile solo quando c'è una query -->
+        <a href="{% url 'lista_manufatti' %}" class="btn btn-outline-danger">Reset</a>
+      {% endif %}
+    </div>
+  </form>
 
   {% if manufatti %}
   <div class="list-group shadow-sm mb-4">
     {% for m in manufatti %}
-    <a href="{% url 'dettaglio_manufatto' m.id %}" class="list-group-item list-group-item-action">
-      <div class="d-flex justify-content-between">
-        <strong>{{ m.nome }}</strong>
-        <span class="badge bg-secondary">{{ m.stato }}</span>
+    <div class="list-group-item">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <a href="{% url 'dettaglio_manufatto' m.id %}" class="text-decoration-none fw-bold">
+            {{ m.nome }}
+          </a>
+          <span class="badge bg-secondary ms-2">{{ m.stato }}</span>
+        </div>
+        <div>
+          <a href="{% url 'modifica_manufatto' m.id %}" class="btn btn-sm btn-warning rounded-pill me-2">✏️ Modifica</a>
+          <a href="{% url 'elimina_manufatto' m.id %}" class="btn btn-sm btn-danger rounded-pill">🗑️ Elimina</a>
+        </div>
       </div>
-    </a>
+    </div>
     {% endfor %}
   </div>
   {% else %}
-  <div class="alert alert-info">Nessun manufatto presente.</div>
+  <!-- Messaggio di avviso per risultati vuoti -->
+  <div class="alert alert-info shadow-sm">Nessun manufatto trovato.</div>
   {% endif %}
 
   <a href="{% url 'tea' %}" class="btn btn-outline-primary rounded-pill">⬅ Torna alla home</a>

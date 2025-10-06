@@ -1,7 +1,12 @@
+import os
+
+from django.db.models import Q
+from django.http import Http404, FileResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from .forms import ManufattoForm, InfoIdricheForm, InfoGeograficheForm, DocumentoForm
 
-from .forms import ManufattoForm, InfoIdricheForm, InfoGeograficheForm
 
 @login_required
 def crea_manufatto(request):
@@ -33,12 +38,27 @@ def crea_manufatto(request):
         'form_geografiche': form_geografiche,
     })
 
-from .models import Manufatto
+from .models import Manufatto, Documento
+
 
 @login_required
+@login_required
 def lista_manufatti(request):
-    manufatti = Manufatto.objects.all()
-    return render(request, 'manufatti/lista_manufatti.html',  {'manufatti': manufatti})
+    # Recupera il parametro di ricerca 'query' dalla richiesta GET
+    query = request.GET.get('query')
+
+    if query:
+        # Filtra i manufatti il cui nome contiene il testo della query (case-insensitive)
+        # Utilizza Q object per combinare le condizioni di ricerca
+        manufatti = Manufatto.objects.filter(Q(nome__icontains=query) | Q(stato__icontains=query))
+    else:
+        # Se non c'è una query, mostra tutti i manufatti
+        manufatti = Manufatto.objects.all()
+
+    return render(request, 'manufatti/lista_manufatti.html', {
+        'manufatti': manufatti,
+        'query': query
+    })
 
 def dettaglio_manufatto(request, manufatto_id):
     manufatto = get_object_or_404(Manufatto, id=manufatto_id)
@@ -66,3 +86,87 @@ def modifica_manufatto(request, pk):
         'manufatto': manufatto,
     })
 
+@login_required
+def elimina_manufatto(request, pk):
+    manufatto = get_object_or_404(Manufatto, pk=pk)
+
+    if request.method == 'POST':
+        manufatto.delete()
+        return redirect('lista_manufatti')
+
+    return render(request, 'manufatti/conferma_elimina.html', {
+        'manufatto': manufatto
+    })
+@login_required
+def visualizza_mappa(request):
+    return render(request, "manufatti/visualizza_mappa.html")
+
+@login_required
+def gestione_documenti(request, manufatto_id):
+    manufatto = get_object_or_404(Manufatto, id=manufatto_id)
+
+    if request.method == 'POST':
+        form = DocumentoForm(request.POST, request.FILES)
+        if form.is_valid():
+            nuovo_documento = form.save(commit=False)
+            nuovo_documento.manufatto = manufatto
+            nuovo_documento.save()
+            return redirect('gestione_documenti', manufatto_id=manufatto.id)
+    else:
+        form = DocumentoForm()
+
+    documenti = manufatto.documenti.all()
+    context = {
+        'manufatto': manufatto,
+        'form': form,
+        'documenti': documenti
+    }
+    return render(request, 'manufatti/gestione_documenti.html', context)
+
+
+# VISTA MODIFICATA PER GESTIRE ANCHE L'UPLOAD
+@login_required
+def lista_documenti(request):
+    # Logica per il caricamento del form
+    if request.method == 'POST':
+        form = DocumentoForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Documento caricato con successo!')
+            return redirect('lista_documenti')
+    else:
+        form = DocumentoForm()
+
+    # Logica per visualizzare la lista (rimane uguale)
+    documenti = Documento.objects.select_related('manufatto').order_by('-data_caricamento')
+
+    context = {
+        'documenti': documenti,
+        'form': form,  # Passiamo il form al template
+    }
+    return render(request, 'manufatti/lista_documenti.html', context)
+
+
+# NUOVA VISTA PER L'ELIMINAZIONE
+@login_required
+def elimina_documento(request, doc_id):
+    documento = get_object_or_404(Documento, id=doc_id)
+    if request.method == 'POST':
+        documento.delete()
+        messages.success(request, 'Documento eliminato correttamente.')
+    return redirect('lista_documenti')
+
+
+def scarica_documento(request, doc_id):
+    try:
+        documento = Documento.objects.get(pk=doc_id)
+    except Documento.DoesNotExist:
+        raise Http404("Il documento non esiste.")
+
+    file_path = documento.file.path
+    if not os.path.exists(file_path):
+        raise Http404("Il file non è stato trovato.")
+
+    response = FileResponse(open(file_path, 'rb'))
+    response['Content-Disposition'] = f'attachment; filename="{os.path.basename(file_path)}"'
+    return response

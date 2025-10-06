@@ -68,19 +68,24 @@
                 opacity: 1;
             }
         }
+
+        .alert {
+            animation: slideInDown 0.3s ease-in-out;
+            font-weight: 500;
+        }
     </style>
 </head>
 <body>
     <div class="header">
         {% if 'tea' in request.path or 'manufatti' in request.path %}
-    <a href="{% url 'tea' %}" class="btn-home" title="Home Tea">
-        <i class="fas fa-home"></i>
-    </a>
-{% elif 'aato' in request.path %}
-    <a href="{% url 'aato' %}" class="btn-home" title="Home AATO">
-        <i class="fas fa-home"></i>
-    </a>
-{% endif %}
+            <a href="{% url 'tea' %}" class="btn-home" title="Home Tea">
+                <i class="fas fa-home"></i>
+            </a>
+        {% elif 'aato' in request.path %}
+            <a href="{% url 'aato' %}" class="btn-home" title="Home AATO">
+                <i class="fas fa-home"></i>
+            </a>
+        {% endif %}
 
         Sistema provinciale di monitoraggio sfiori<br>Provincia di Mantova
     </div>
@@ -90,6 +95,18 @@
         <img src="{% static 'mappa.jpg' %}" alt="Mappa Mantova" width="150">
     </div>
 
+    {% if messages and request.resolver_match.url_name != 'login' %}
+      <div class="container mt-3">
+        {% for message in messages %}
+          <div class="alert alert-{{ message.tags }} rounded-pill shadow-sm" role="alert">
+            {{ message }}
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
     {% block content %}{% endblock %}
+
+    {% block extra_js %}{% endblock %}
 </body>
 </html>

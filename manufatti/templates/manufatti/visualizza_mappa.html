@@ -1,0 +1,28 @@
+{% extends "accounts/base.html" %}
+{% load static %}
+
+{% block content %}
+<h2 style="text-align: center; margin-top: 10px; margin-bottom: 25px;">
+    Mappa della Provincia di Mantova
+</h2>
+
+<div id="map" style="height: 600px; width: 100%;"></div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<script>
+    // Inizializzazione mappa centrata su Mantova
+    var map = L.map('map').setView([45.1602, 10.7970], 12);
+
+    // Aggiunta dei tile OpenStreetMap
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: 'Map data © <a href="https://openstreetmap.org">OpenStreetMap</a>',
+    }).addTo(map);
+</script>
+{% endblock %}

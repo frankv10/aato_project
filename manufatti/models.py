@@ -29,3 +29,19 @@ class info_geografiche(models.Model):
 
     def __str__(self):
         return f"info geografiche {self.manufatto.nome}"
+
+class Documento(models.Model):
+    # RIGA MODIFICATA
+    manufatto = models.ForeignKey(
+        Manufatto,
+        on_delete=models.SET_NULL,  # Se un manufatto viene cancellato, il documento non viene eliminato
+        related_name='documenti',
+        null=True,                  # Permette al database di salvare il campo come NULL
+        blank=True                  # Permette al form di Django di accettare un valore vuoto
+    )
+    titolo = models.CharField(max_length=200)
+    file = models.FileField(upload_to='documenti/%Y/%m/%d/')
+    data_caricamento = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.titolo

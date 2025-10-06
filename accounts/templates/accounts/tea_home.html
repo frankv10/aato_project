@@ -7,10 +7,12 @@
 <div class="main-box">
     <h2>Benvenuto {{ user.username }}</h2>
 
-    <a href="{% url 'crea_manufatto' %}" class="btn btn-primary big-button">Nuovo manufatto</a>
-    <a href="{% url 'lista_manufatti' %}" class="btn btn-success big-button">Lista manufatti</a>
-    <a href="#" class="btn btn-warning big-button">Visualizza mappa</a>
-    <a href="{% url 'login' %}" class="btn btn-danger rounded-pill">Esci</a>
+    <a href="{% url 'crea_manufatto' %}?from=ato" class="btn btn-primary big-button">Nuovo manufatto</a>
+    <a href="{% url 'lista_manufatti' %}?from=ato" class="btn btn-success big-button">Lista manufatti</a>
+    <a href="{% url 'lista_documenti' %}" class="btn btn-info big-button text-dark">Elenco documenti</a>
+    <a href="{% url 'visualizza_mappa' %}" class="btn btn-warning big-button text-dark">Visualizza mappa</a>
+
+    <a href="{% url 'logout' %}" class="btn btn-danger rounded-pill">Esci</a>
 </div>
 
 <style>
