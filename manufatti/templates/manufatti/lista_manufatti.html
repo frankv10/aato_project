@@ -6,13 +6,11 @@
     <a href="{% url 'crea_manufatto' %}" class="btn btn-success rounded-pill">➕ Crea nuovo</a>
   </div>
 
-  <!-- FORM DI RICERCA -->
   <form method="GET" action="{% url 'lista_manufatti' %}" class="mb-4">
     <div class="input-group shadow-sm rounded-pill">
       <input type="text" name="query" class="form-control rounded-start-pill" placeholder="Cerca manufatto per nome o stato..." value="{{ query|default:'' }}">
       <button class="btn btn-primary" type="submit">Cerca</button>
       {% if query %}
-        <!-- Pulsante per resettare la ricerca, visibile solo quando c'è una query -->
         <a href="{% url 'lista_manufatti' %}" class="btn btn-outline-danger">Reset</a>
       {% endif %}
     </div>
@@ -38,7 +36,6 @@
     {% endfor %}
   </div>
   {% else %}
-  <!-- Messaggio di avviso per risultati vuoti -->
   <div class="alert alert-info shadow-sm">Nessun manufatto trovato.</div>
   {% endif %}
 

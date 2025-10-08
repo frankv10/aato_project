@@ -44,15 +44,12 @@ from .models import Manufatto, Documento
 @login_required
 @login_required
 def lista_manufatti(request):
-    # Recupera il parametro di ricerca 'query' dalla richiesta GET
+
     query = request.GET.get('query')
 
     if query:
-        # Filtra i manufatti il cui nome contiene il testo della query (case-insensitive)
-        # Utilizza Q object per combinare le condizioni di ricerca
         manufatti = Manufatto.objects.filter(Q(nome__icontains=query) | Q(stato__icontains=query))
     else:
-        # Se non c'è una query, mostra tutti i manufatti
         manufatti = Manufatto.objects.all()
 
     return render(request, 'manufatti/lista_manufatti.html', {
@@ -124,10 +121,10 @@ def gestione_documenti(request, manufatto_id):
     return render(request, 'manufatti/gestione_documenti.html', context)
 
 
-# VISTA MODIFICATA PER GESTIRE ANCHE L'UPLOAD
+
 @login_required
 def lista_documenti(request):
-    # Logica per il caricamento del form
+
     if request.method == 'POST':
         form = DocumentoForm(request.POST, request.FILES)
         if form.is_valid():
@@ -137,17 +134,15 @@ def lista_documenti(request):
     else:
         form = DocumentoForm()
 
-    # Logica per visualizzare la lista (rimane uguale)
     documenti = Documento.objects.select_related('manufatto').order_by('-data_caricamento')
 
     context = {
         'documenti': documenti,
-        'form': form,  # Passiamo il form al template
+        'form': form,
     }
     return render(request, 'manufatti/lista_documenti.html', context)
 
 
-# NUOVA VISTA PER L'ELIMINAZIONE
 @login_required
 def elimina_documento(request, doc_id):
     documento = get_object_or_404(Documento, id=doc_id)

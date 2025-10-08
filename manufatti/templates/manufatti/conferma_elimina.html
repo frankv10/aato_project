@@ -1,0 +1,60 @@
+{% extends "accounts/base.html" %}
+
+{% block title %}Conferma Eliminazione Manufatto{% endblock %}
+
+{% block content %}
+<div class="main-box" style="
+    max-width: 500px;
+    margin: 40px auto;
+    padding: 30px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    animation: slideInDown 0.8s ease-out;
+">
+    <h2 class="text-danger mb-4">Conferma Eliminazione</h2>
+
+    <div class="alert alert-warning" role="alert">
+        <h4 class="alert-heading"><i class="fas fa-exclamation-triangle"></i> Attenzione!</h4>
+        <p>Stai per eliminare definitivamente il manufatto selezionato. Questa azione è **irreversibile**.</p>
+    </div>
+
+    <p class="mb-4">Sei sicuro di voler eliminare il manufatto:</p>
+
+    <ul class="list-group mb-4">
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            ID Manufatto:
+            <span class="badge bg-primary rounded-pill">{{ manufatto.pk }}</span> </li>
+        {% comment %}
+           Se il tuo modello Manufatto ha un campo 'denominazione', usalo qui
+        {% endcomment %}
+        {% if manufatto.denominazione %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            Nome/Descrizione:
+            <span class="text-dark fw-bold">{{ manufatto.denominazione }}</span>
+        </li>
+        {% endif %}
+    </ul>
+
+
+    <form method="post" class="mt-4">
+        {% csrf_token %}
+
+        <button type="submit" class="btn btn-danger w-100 py-2">
+            <i class="fas fa-trash-alt"></i> Sì, Elimina Definitivamente
+        </button>
+    </form>
+
+    <a href="{% url 'dettaglio_manufatto' manufatto.pk %}" class="btn btn-outline-secondary w-100 mt-3">
+        <i class="fas fa-arrow-left"></i> Annulla e Torna Indietro
+    </a>
+
+</div>
+
+<style>
+@keyframes slideInDown {
+  from { transform: translateY(-30px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+</style>
+{% endblock %}

@@ -34,10 +34,10 @@ class Documento(models.Model):
     # RIGA MODIFICATA
     manufatto = models.ForeignKey(
         Manufatto,
-        on_delete=models.SET_NULL,  # Se un manufatto viene cancellato, il documento non viene eliminato
+        on_delete=models.SET_NULL,
         related_name='documenti',
-        null=True,                  # Permette al database di salvare il campo come NULL
-        blank=True                  # Permette al form di Django di accettare un valore vuoto
+        null=True,
+        blank=True
     )
     titolo = models.CharField(max_length=200)
     file = models.FileField(upload_to='documenti/%Y/%m/%d/')

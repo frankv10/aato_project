@@ -6,7 +6,6 @@
     <div class="main-box">
         <h2 class="text-primary mb-4">🔎 Ricerca Interventi</h2>
 
-        <!-- FORM DI RICERCA -->
         <form method="get" class="mb-4">
             <div class="mb-3">
                 <label for="q" class="form-label">Nome del manufatto</label>
@@ -31,7 +30,6 @@
             <button type="submit" class="btn btn-primary w-100">🔍 Cerca</button>
         </form>
 
-        <!-- RISULTATI -->
         {% if risultati %}
             <div class="list-group mt-4">
                 {% for m in risultati %}

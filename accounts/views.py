@@ -16,7 +16,7 @@ def login_view(request):
         user = authenticate(request, username=username, password=password)
         if user:
             login(request, user)
-            ente = user.profilo.ente  # accede al campo ente
+            ente = user.profilo.ente
             if ente == 'AATO':
                 return redirect('aato')
             elif ente == 'TEA':
@@ -50,7 +50,7 @@ def registra_utente(request):
                 user=user,
                 ente=form.cleaned_data['ente']
             )
-            return redirect('login')  # oppure redirect alla dashboard
+            return redirect('login')
     else:
         form = UserProfiloForm()
     return render(request, 'accounts/registrazione.html', {'form': form})

@@ -16,11 +16,9 @@
     <form method="post">
         {% csrf_token %}
 
-        <!-- Sezione Manufatto -->
         <h4 class="text-start mb-2">Manufatto</h4>
         {{ form_manufatto.as_p }}
 
-        <!-- Bottone INFO IDRAULICHE -->
         <button type="button" class="btn btn-outline-secondary w-100 mb-3 py-3"
                 onclick="toggleSection('info-idriche')">INFO IDRAULICHE</button>
 
@@ -28,7 +26,6 @@
             {{ form_idriche.as_p }}
         </div>
 
-        <!-- Bottone INFO GEOGRAFICHE -->
         <button type="button" class="btn btn-outline-secondary w-100 mb-3 py-3"
                 onclick="toggleSection('info-geografiche')">INFO GEOGRAFICHE</button>
 
