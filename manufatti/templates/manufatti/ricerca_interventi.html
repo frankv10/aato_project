@@ -45,7 +45,15 @@
             <div class="alert alert-warning mt-4">Nessun risultato trovato con i criteri inseriti.</div>
         {% endif %}
 
-        <a href="{% url 'tea' %}" class="btn btn-outline-secondary rounded-pill mt-4">⬅ Torna alla home</a>
+        {% comment %}
+          NUOVO BLOCCO PIÙ AFFIDABILE: Utilizza la variabile passata dalla vista,
+          che identifica l'ente loggato, ignorando i parametri GET persi.
+        {% endcomment %}
+        {% if ente_utente == 'AATO' %}
+            <a href="{% url 'aato' %}" class="btn btn-outline-secondary rounded-pill mt-4">⬅ Torna alla home AATO</a>
+        {% else %}
+            <a href="{% url 'tea' %}" class="btn btn-outline-secondary rounded-pill mt-4">⬅ Torna alla home TEA</a>
+        {% endif %}
     </div>
 </div>
 

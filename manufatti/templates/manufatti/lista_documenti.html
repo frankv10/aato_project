@@ -5,6 +5,21 @@
 {% block content %}
 <div class="container mt-4 mb-5">
 
+    <h2 class="mb-4"><i class="fas fa-folder-open me-2"></i>Elenco Documenti Esistenti</h2>
+
+    {% comment %} 🌟 AGGIUNTO: FORM DI RICERCA 🌟 {% endcomment %}
+    <form method="GET" action="{% url 'lista_documenti' %}" class="mb-4">
+        <div class="input-group shadow-sm rounded-pill">
+            <input type="text" name="query" class="form-control rounded-start-pill"
+                   placeholder="Cerca per titolo o nome manufatto..."
+                   value="{{ query|default:'' }}">
+            <button class="btn btn-primary" type="submit">🔍 Cerca</button>
+            {% if query %}
+                <a href="{% url 'lista_documenti' %}" class="btn btn-outline-danger">Reset</a>
+            {% endif %}
+        </div>
+    </form>
+
     <div class="card shadow-sm mb-5">
         <div class="card-header bg-dark text-white">
             <h4 class="mb-0"><i class="fas fa-upload me-2"></i>Carica un nuovo documento</h4>
@@ -18,7 +33,6 @@
         </div>
     </div>
 
-    <h2 class="mb-4"><i class="fas fa-folder-open me-2"></i>Elenco Documenti Esistenti</h2>
     <div class="card shadow-sm">
         <div class="card-body">
             {% if documenti %}
@@ -38,7 +52,7 @@
                                     <td><strong>{{ doc.titolo }}</strong></td>
                                     <td>
                                         {% if doc.manufatto %}
-                                            {{ doc.manufatto.nome }}
+                                            <a href="{% url 'dettaglio_manufatto' doc.manufatto.id %}" class="text-primary">{{ doc.manufatto.nome }}</a>
                                         {% else %}
                                             <span class="badge bg-secondary">Documento Generale</span>
                                         {% endif %}
@@ -47,7 +61,6 @@
                                     <td class="text-end">
                                        <a href="{% url 'scarica_documento' doc.id %}" class="btn btn-success btn-sm">
                                             <i class="fas fa-download me-1"></i> Scarica
-                                        </a>
                                         </a>
 
                                         <form method="post" action="{% url 'elimina_documento' doc.id %}" style="display: inline;" onsubmit="return confirm('Sei sicuro di voler eliminare questo documento?');">
@@ -63,9 +76,20 @@
                     </table>
                 </div>
             {% else %}
-                <p class="text-center text-muted">Non è stato ancora caricato nessun documento nel sistema.</p>
+                <p class="text-center alert alert-info">Nessun documento trovato con i criteri di ricerca.</p>
             {% endif %}
         </div>
+    </div>
+
+    {% comment %}
+      PULSANTI DI RITORNO DINAMICI
+    {% endcomment %}
+    <div class="text-center mt-4">
+        {% if ente_utente == 'AATO' %}
+            <a href="{% url 'aato' %}" class="btn btn-outline-primary rounded-pill">⬅ Torna alla home AATO</a>
+        {% else %}
+            <a href="{% url 'tea' %}" class="btn btn-outline-primary rounded-pill">⬅ Torna alla home TEA</a>
+        {% endif %}
     </div>
 </div>
 {% endblock %}

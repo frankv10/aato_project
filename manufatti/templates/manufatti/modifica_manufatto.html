@@ -1,9 +1,10 @@
 {% extends "accounts/base.html" %}
-{% block title %}Modifica Manufatto{% endblock %}
+
+{% block title %}Modifica {{ manufatto.nome }}{% endblock %}
 
 {% block content %}
 <div class="main-box" style="
-    max-width: 600px;
+    max-width: 800px; /* Aumentato per i nuovi campi */
     margin: 40px auto;
     padding: 30px;
     background: white;
@@ -11,45 +12,93 @@
     box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
     animation: slideInDown 0.8s ease-out;
 ">
-    <h2 class="text-primary mb-4">Modifica Manufatto</h2>
+    <h2 class="text-primary mb-4">Modifica Manufatto: {{ manufatto.nome }}</h2>
+
+    {% comment %} Messaggi di successo/errore {% endcomment %}
+    {% if messages %}
+        <ul class="messages list-unstyled">
+            {% for message in messages %}
+            <li{% if message.tags %} class="{{ message.tags }} alert alert-success rounded-pill shadow-sm"{% endif %}>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
 
     <form method="post">
         {% csrf_token %}
 
-        <h4 class="text-start mb-2">Manufatto</h4>
-        {{ form_manufatto.as_p }}
-
-        <button type="button" class="btn btn-outline-secondary w-100 mb-3 py-3"
-                onclick="toggleSection('info-idriche')">INFO IDRAULICHE</button>
-
-        <div id="info-idriche" style="display: none;" class="text-start mb-3">
-            {{ form_idriche.as_p }}
+        <h4 class="text-start mb-2">Dati Anagrafici</h4>
+        <div class="text-start mb-3 border p-3 rounded">
+            {{ form_manufatto.as_p }}
         </div>
 
-        <button type="button" class="btn btn-outline-secondary w-100 mb-3 py-3"
-                onclick="toggleSection('info-geografiche')">INFO GEOGRAFICHE</button>
 
-        <div id="info-geografiche" style="display: none;" class="text-start mb-3">
-            {{ form_geografiche.as_p }}
+        <button type="button" class="btn btn-outline-info w-100 mb-3 py-3"
+                data-bs-toggle="collapse" data-bs-target="#info-idriche-collapse" aria-expanded="false">
+                <i class="fas fa-water me-2"></i> INFO IDRAULICHE
+        </button>
+
+        <div id="info-idriche-collapse" class="collapse text-start mb-3 border p-3 rounded">
+            <h5 class="text-info mb-3">Dati Idraulici Completi</h5>
+            <div class="row">
+                {% for field in form_idriche %}
+                    {% comment %}
+                      FIX LAYOUT: Se è l'ultimo campo (le Note), usa col-md-12 (larghezza intera),
+                      altrimenti usa col-md-6 (metà larghezza).
+                    {% endcomment %}
+                    <div class="{% if forloop.last %}col-md-12{% else %}col-md-6{% endif %} mb-3">
+                        <label for="{{ field.id_for_label }}" class="form-label small">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.errors %}
+                            <div class="text-danger small">{{ field.errors|first }}</div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <button type="button" class="btn btn-outline-dark w-100 mb-3 py-3"
+                data-bs-toggle="collapse" data-bs-target="#info-geografiche-collapse" aria-expanded="false">
+                <i class="fas fa-map-marker-alt me-2"></i> INFO GEOGRAFICHE (Lat/Lon)
+        </button>
+
+        <div id="info-geografiche-collapse" class="collapse text-start mb-3 border p-3 rounded">
+            <h5 class="text-dark mb-3">Coordinate</h5>
+            <div class="row">
+                {% for field in form_geografiche %}
+                    <div class="col-md-6 mb-3">
+                        <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.errors %}
+                            <div class="text-danger small">{{ field.errors|first }}</div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
         </div>
 
         <button type="submit" class="btn btn-primary w-100 mt-4"> Salva modifiche</button>
     </form>
 
-    <a href="{% url 'lista_manufatti' %}" class="btn btn-outline-secondary w-100 mt-3">⬅ Torna alla lista</a>
+    <a href="{% url 'dettaglio_manufatto' manufatto.id %}" class="btn btn-outline-secondary w-100 mt-3">⬅ Torna al dettaglio</a>
 </div>
-
-<script>
-function toggleSection(id) {
-    const section = document.getElementById(id);
-    section.style.display = section.style.display === "none" ? "block" : "none";
-}
-</script>
 
 <style>
 @keyframes slideInDown {
   from { transform: translateY(-30px); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
 }
+/* Stile per i tag p generati da form.as_p */
+.text-start p {
+    margin-bottom: 0.5rem;
+}
+/* Rimuove i margini di default per un layout a griglia pulito */
+.text-start p:has(> .row) {
+    margin: 0;
+    padding: 0;
+}
 </style>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 {% endblock %}

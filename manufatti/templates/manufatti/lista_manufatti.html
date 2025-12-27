@@ -39,6 +39,13 @@
   <div class="alert alert-info shadow-sm">Nessun manufatto trovato.</div>
   {% endif %}
 
-  <a href="{% url 'tea' %}" class="btn btn-outline-primary rounded-pill">⬅ Torna alla home</a>
+  {% comment %}
+    PULSANT E AGGIORNATO: Ora reindirizza in base alla variabile 'ente_utente' passata dalla view.
+  {% endcomment %}
+  {% if ente_utente == 'AATO' %}
+    <a href="{% url 'aato' %}" class="btn btn-outline-primary rounded-pill">⬅ Torna alla home AATO</a>
+  {% else %}
+    <a href="{% url 'tea' %}" class="btn btn-outline-primary rounded-pill">⬅ Torna alla home TEA</a>
+  {% endif %}
 </div>
 {% endblock %}

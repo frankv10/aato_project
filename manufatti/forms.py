@@ -1,24 +1,35 @@
+import os
 from django import forms
-from .models import Manufatto, info_idriche, info_geografiche, Documento
+from django.core.management.base import BaseCommand
+from manufatti.models import Manufatto, info_idriche, info_geografiche, Documento
 
 
 class ManufattoForm(forms.ModelForm):
     class Meta:
         model = Manufatto
-        fields = ['nome', 'stato']
+        # Campi base del manufatto
+        fields = ['nome', 'stato', 'comune', 'localita', 'ubicazione', 'depuratore_associato', 'recapito_emissario', 'tipologia_sfioratore']
         widgets = {
-            'nome': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Inserisci il nome'}),
+            'nome': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Codice Manufatto (es. SF-BGN-ALL1)'}),
             'stato': forms.Select(attrs={'class': 'form-select'}),
+            'comune': forms.TextInput(attrs={'class': 'form-control'}),
+            'localita': forms.TextInput(attrs={'class': 'form-control'}),
+            'ubicazione': forms.TextInput(attrs={'class': 'form-control'}),
+            'depuratore_associato': forms.TextInput(attrs={'class': 'form-control'}),
+            'recapito_emissario': forms.TextInput(attrs={'class': 'form-control'}),
+            'tipologia_sfioratore': forms.TextInput(attrs={'class': 'form-control'}),
         }
 
 
 class InfoIdricheForm(forms.ModelForm):
     class Meta:
         model = info_idriche
-        fields = ['portata', 'pressione']
+        # Rimuove 'manufatto' (gestito dalla vista) e include tutti i campi idrici
+        exclude = ['manufatto']
+        # Applica lo stile form-control a tutti i widget
         widgets = {
-            'portata': forms.NumberInput(attrs={'class': 'form-control'}),
-            'pressione': forms.NumberInput(attrs={'class': 'form-control'}),
+            field_name: forms.TextInput(attrs={'class': 'form-control'}) 
+            for field_name in info_idriche._meta.get_fields() if field_name.name != 'manufatto' and field_name.name != 'id'
         }
 
 
@@ -30,8 +41,8 @@ class InfoGeograficheForm(forms.ModelForm):
             'latitudine': forms.NumberInput(attrs={'class': 'form-control'}),
             'longitudine': forms.NumberInput(attrs={'class': 'form-control'}),
         }
+
 class DocumentoForm(forms.ModelForm):
-    # NUOVO METODO AGGIUNTO
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['manufatto'].empty_label = "Nessun manufatto (documento generale)"

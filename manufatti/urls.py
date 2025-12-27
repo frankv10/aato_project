@@ -1,5 +1,5 @@
 from django.urls import path
-from .import views
+from . import views
 
 urlpatterns = [
     path('crea/', views.crea_manufatto, name='crea_manufatto'),
@@ -12,5 +12,11 @@ urlpatterns = [
     path('documenti/', views.lista_documenti, name='lista_documenti'),
     path('documenti/<int:doc_id>/elimina/', views.elimina_documento, name='elimina_documento'),
     path('scarica/<int:doc_id>/', views.scarica_documento, name='scarica_documento'),
+    path('ricerca/', views.ricerca_interventi, name='ricerca_interventi'),
 
+    # --- RIGHE RIMOSSE ---
+    # Le seguenti righe sono state rimosse per evitare l'errore "pagina bianca"
+    # (Usiamo i popup, non pagine separate)
+    # path('modifica_idriche/<int:pk>/', views.modifica_info_idriche, name='modifica_idriche'),
+    # path('modifica_geografiche/<int:pk>/', views.modifica_info_geografiche, name='modifica_geografiche'),
 ]

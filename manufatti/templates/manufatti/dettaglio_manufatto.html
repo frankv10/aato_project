@@ -1,65 +1,182 @@
 {% extends "accounts/base.html" %}
-{% load static %}
-{% block content %}
-<div class="main-box">
-    <h2 class="text-primary mb-3">{{ manufatto.nome }}</h2>
 
-    <p><strong>Stato:</strong> {{ manufatto.stato }}</p>
-    <p><strong>Data creazione:</strong> {{ manufatto.data_creazione }}</p>
+{% block title %}Dettaglio {{ manufatto.nome }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4 mb-5">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="text-primary">Dettaglio Manufatto: <strong>{{ manufatto.nome }}</strong></h2>
+        <span class="badge bg-secondary p-2">{{ manufatto.stato }}</span>
+    </div>
+
+    <div class="row">
+        <!-- Colonna Sinistra: Dati Geografici -->
+        <div class="col-md-5">
+            <div class="card shadow-sm mb-3">
+                <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-map-marker-alt me-2"></i>Informazioni Geografiche</h5>
+                    {% if geografiche %}
+                        <!-- TASTO CORRETTO: Ora usa il modal (popup) -->
+                        <button class="btn btn-sm btn-outline-light" data-bs-toggle="modal" data-bs-target="#geoModal">
+                            Visualizza Dati
+                        </button>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    {% if geografiche %}
+                        <p><strong>Latitudine:</strong> {{ geografiche.latitudine }}</p>
+                        <p><strong>Longitudine:</strong> {{ geografiche.longitudine }}</p>
+                        <hr>
+                        <p><strong>Comune:</strong> {{ manufatto.comune }}</p>
+                        <p><strong>Località:</strong> {{ manufatto.localita }}</p>
+                        <p><strong>Ubicazione:</strong> {{ manufatto.ubicazione }}</p>
+                    {% else %}
+                        <p class="text-muted">Nessuna informazione geografica disponibile.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Colonna Destra: Dati Idrici -->
+        <div class="col-md-7">
+            <div class="card shadow-sm mb-3">
+                <div class="card-header bg-info text-dark d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-water me-2"></i>Informazioni Idriche</h5>
+                    {% if idriche %}
+                        <!-- TASTO CORRETTO: Ora usa il modal (popup) -->
+                        <button class="btn btn-sm btn-outline-dark" data-bs-toggle="modal" data-bs-target="#idricheModal">
+                            Visualizza Dati Completi
+                        </button>
+                    {% endif %}
+                </div>
+                <div class="card-body" style="font-size: 0.9rem;">
+                    {% if idriche %}
+                        <p><strong>Portata Nera Media (Qnm):</strong> {{ idriche.qnm }} l/s</p>
+                        <p><strong>Portata di Soglia (Qs):</strong> {{ idriche.qs }} l/s</p>
+                        <p><strong>Abitanti Equivalenti (AE TOT):</strong> {{ idriche.ae_tot }}</p>
+                    {% else %}
+                        <p class="text-muted">Nessuna informazione idrica disponibile.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
 
     <hr>
 
-    <h4 class="text-secondary">Info Idriche</h4>
-    {% if idriche %}
-    <ul class="list-group mb-3">
-      {% for info in idriche %}
-      <li class="list-group-item">
-        <strong>Portata:</strong> {{ info.portata }} |
-        <strong>Pressione:</strong> {{ info.pressione }}
-      </li>
-      {% endfor %}
-    </ul>
-    {% else %}
-    <p class="text-muted">Nessuna info idrica disponibile.</p>
-    {% endif %}
+    <div class="d-flex justify-content-between">
+        <a href="{% url 'lista_manufatti' %}" class="btn btn-outline-secondary rounded-pill">
+            <i class="fas fa-arrow-left me-2"></i>Indietro alla Lista
+        </a>
 
-    <h4 class="text-secondary">Info Geografiche</h4>
-    {% if geografiche %}
-    <ul class="list-group mb-3">
-      {% for geo in geografiche %}
-      <li class="list-group-item">
-        <strong>Latitudine:</strong> {{ geo.latitudine }} |
-        <strong>Longitudine:</strong> {{ geo.longitudine }}
-      </li>
-      {% endfor %}
-    </ul>
-    {% else %}
-    <p class="text-muted">Nessuna info geografica disponibile.</p>
-    {% endif %}
+        <a href="{% url 'gestione_documenti' manufatto.id %}" class="btn btn-dark rounded-pill">
+            <i class="fas fa-folder me-2"></i>Gestisci Documenti
+        </a>
 
-    <a href="{% url 'lista_manufatti' %}" class="btn btn-outline-primary rounded-pill mt-4">⬅ Torna alla lista</a>
+        {% comment %} Pulsante Home Dinamico {% endcomment %}
+        {% if ente_utente == 'AATO' %}
+            <a href="{% url 'aato' %}" class="btn btn-outline-primary rounded-pill">
+                <i class="fas fa-home me-2"></i>Torna alla home AATO
+            </a>
+        {% else %}
+            <a href="{% url 'tea' %}" class="btn btn-outline-primary rounded-pill">
+                <i class="fas fa-home me-2"></i>Torna alla home TEA
+            </a>
+        {% endif %}
+    </div>
+
 </div>
 
-<style>
-    .main-box {
-        max-width: 600px;
-        margin: 40px auto;
-        padding: 30px;
-        background: white;
-        border-radius: 12px;
-        box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
-        animation: slideInDown 0.8s ease-out;
-    }
+<!-- 🌟 MODAL (POPUP) PER DATI IDRICI (AGGIORNATO) 🌟 -->
+{% if idriche %}
+<div class="modal fade" id="idricheModal" tabindex="-1" aria-labelledby="idricheModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered"> <!-- Aumentata dimensione a XL -->
+        <div class="modal-content">
+            <div class="modal-header bg-info text-dark">
+                <h5 class="modal-title" id="idricheModalLabel">Informazioni Idriche Complete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" style="font-size: 0.9rem;">
+                <div class="row">
+                    <!-- Colonna 1: M-V -->
+                    <div class="col-md-4">
+                        <h6 class="text-info">Dati Idraulici (M-V)</h6>
+                        <p><strong>AE CIV:</strong> {{ idriche.ae_civ }}</p>
+                        <p><strong>AE IND:</strong> {{ idriche.ae_ind }}</p>
+                        <p><strong>AE TOT:</strong> {{ idriche.ae_tot }}</p>
+                        <p><strong>Q CIV:</strong> {{ idriche.q_civ }} l/s</p>
+                        <p><strong>Q IND:</strong> {{ idriche.q_ind }} l/s</p>
+                        <p><strong>Qnm:</strong> {{ idriche.qnm }} l/s</p>
+                        <p><strong>Qs:</strong> {{ idriche.qs }} l/s</p>
+                        <p><strong>Pavv:</strong> {{ idriche.pavv }} l/s</p>
+                        <p><strong>Qs/Qnm:</strong> {{ idriche.qs_qnm_ratio }}</p>
+                        <p><strong>Qs > Pavv:</strong> {{ idriche.qs_gt_pavv }}</p>
+                    </div>
+                    <!-- Colonna 2: W-AG -->
+                    <div class="col-md-4">
+                        <h6 class="text-info">Dati Idraulici (W-AG)</h6>
+                        <p><strong>Qs/Pavv:</strong> {{ idriche.qs_pavv_ratio }}</p>
+                        <p><strong>Tipologia:</strong> {{ idriche.tipologia_sfioro_rr6 }}</p>
+                        <p><strong>Conforme:</strong> {{ idriche.e_conforme }}</p>
+                        <p><strong>Vasca Reg.:</strong> {{ idriche.vasca_reg_regionale }}</p>
+                        <p><strong>Bacino:</strong> {{ idriche.bacino_proprio_ha }} ha</p>
+                        <p><strong>Q Meteo:</strong> {{ idriche.q_meteo_ingresso_ls }} l/s</p>
+                        <p><strong>Q Limite:</strong> {{ idriche.q_limite_ingresso_ls }} l/s</p>
+                        <p><strong>Manufatto Lim.:</strong> {{ idriche.manufatto_limitante }}</p>
+                        <p><strong>Portata Spec.:</strong> {{ idriche.portata_specifica_scarico }}</p>
+                        <p><strong>ha imp:</strong> {{ idriche.ha_imp }} ha</p>
+                        <p><strong>Qscolmata:</strong> {{ idriche.qscolmata_ls }} l/s</p>
+                    </div>
+                    <!-- 🌟 Colonna 3: NUOVI CAMPI (AH-AO) 🌟 -->
+                    <div class="col-md-4">
+                        <h6 class="text-info">Dati Autorizzazioni (AH-AO)</h6>
+                        <p><strong>Vasca PTUA:</strong> {{ idriche.vasca_ptua }}</p>
+                        <p><strong>Scadenza Autorizz.:</strong> {{ idriche.scadenza_autorizzazione }}</p>
+                        <p><strong>Atto Provincia:</strong> {{ idriche.atto_provincia_n }}</p>
+                        <p><strong>Consorzio:</strong> {{ idriche.consorzio_competente }}</p>
+                        <p><strong>Scadenza Concess.:</strong> {{ idriche.scadenza_concessione }}</p>
+                        <p><strong>Atto Consorzio:</strong> {{ idriche.atto_consorzio_n }}</p>
+                        <p><strong>Note Autorizz.:</strong> {{ idriche.note_autorizzazioni }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
 
-    @keyframes slideInDown {
-        from {
-            transform: translateY(-40px);
-            opacity: 0;
-        }
-        to {
-            transform: translateY(0);
-            opacity: 1;
-        }
-    }
-</style>
+<!-- MODAL (POPUP) PER DATI GEOGRAFICI -->
+{% if geografiche %}
+<div class="modal fade" id="geoModal" tabindex="-1" aria-labelledby="geoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title" id="geoModalLabel">Informazioni Geografiche Complete</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p><strong>Comune:</strong> {{ manufatto.comune }}</p>
+                <p><strong>Località:</strong> {{ manufatto.localita }}</p>
+                <p><strong>Ubicazione:</strong> {{ manufatto.ubicazione }}</p>
+                <hr>
+                <p><strong>Latitudine:</strong> {{ geografiche.latitudine }}</p>
+                <p><strong>Longitudine:</strong> {{ geografiche.longitudine }}</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
 {% endblock %}
+
+{% block extra_js %}
+<!-- Assicurati che Bootstrap JS sia caricato (di solito è nel base.html, ma se non c'è, è necessario) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+{% endblock %}
+
