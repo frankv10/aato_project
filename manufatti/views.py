@@ -97,69 +97,56 @@ def dettaglio_manufatto(request, manufatto_id):
 
 @login_required
 def modifica_manufatto(request, pk):
-    """
-    Gestisce la modifica di Manufatto e delle sue relative info (Idriche, Geografiche)
-    attraverso un unico form template.
-    """
     ente_utente = get_user_ente(request.user)
+    if ente_utente != 'TEA':
+        messages.error(request, "Accesso negato: non hai i permessi per modificare.")
+        return redirect('lista_manufatti')
+
     manufatto = get_object_or_404(Manufatto, pk=pk)
-
-    # Carica le istanze OneToOne esistenti
-    try:
-        info_idriche_instance = manufatto.info_idriche
-    except info_idriche.DoesNotExist:
-        info_idriche_instance = None
-
-    try:
-        info_geografiche_instance = manufatto.info_geografiche
-    except info_geografiche.DoesNotExist:
-        info_geografiche_instance = None
+    idriche_inst = getattr(manufatto, 'info_idriche', None)
+    geo_inst = getattr(manufatto, 'info_geografiche', None)
 
     if request.method == 'POST':
-        form_manufatto = ManufattoForm(request.POST, instance=manufatto)
-        form_idriche = InfoIdricheForm(request.POST, instance=info_idriche_instance)
-        form_geografiche = InfoGeograficheForm(request.POST, instance=info_geografiche_instance)
+        f_m = ManufattoForm(request.POST, instance=manufatto)
+        f_i = InfoIdricheForm(request.POST, instance=idriche_inst)
+        f_g = InfoGeograficheForm(request.POST, instance=geo_inst)
 
-        if form_manufatto.is_valid() and form_idriche.is_valid() and form_geografiche.is_valid():
-            form_manufatto.save()
-
-            # Salvataggio e collegamento delle info idriche
-            idriche = form_idriche.save(commit=False)
-            idriche.manufatto = manufatto
-            idriche.save()
-
-            # Salvataggio e collegamento delle info geografiche
-            geo = form_geografiche.save(commit=False)
-            geo.manufatto = manufatto
-            geo.save()
-
-            messages.success(request, f"Manufatto {manufatto.nome} aggiornato con successo.")
+        if f_m.is_valid() and f_i.is_valid() and f_g.is_valid():
+            f_m.save()
+            i = f_i.save(commit=False)
+            i.manufatto = manufatto
+            i.save()
+            g = f_g.save(commit=False)
+            g.manufatto = manufatto
+            g.save()
+            messages.success(request, "Modifiche salvate.")
             return redirect('dettaglio_manufatto', manufatto_id=manufatto.id)
     else:
-        # Carica i form con i dati esistenti
-        form_manufatto = ManufattoForm(instance=manufatto)
-        form_idriche = InfoIdricheForm(instance=info_idriche_instance)
-        form_geografiche = InfoGeograficheForm(instance=info_geografiche_instance)
+        f_m = ManufattoForm(instance=manufatto)
+        f_i = InfoIdricheForm(instance=idriche_inst)
+        f_g = InfoGeograficheForm(instance=geo_inst)
 
     return render(request, 'manufatti/modifica_manufatto.html', {
-        'form_manufatto': form_manufatto,
-        'form_idriche': form_idriche,
-        'form_geografiche': form_geografiche,
-        'manufatto': manufatto,
-        'ente_utente': ente_utente,
+        'form_manufatto': f_m, 'form_idriche': f_i, 'form_geografiche': f_g,
+        'manufatto': manufatto, 'ente_utente': ente_utente
     })
 
 
 @login_required
 def elimina_manufatto(request, pk):
     ente_utente = get_user_ente(request.user)
+    if ente_utente != 'TEA':
+        messages.error(request, "Accesso negato: non puoi eliminare manufatti.")
+        return redirect('lista_manufatti')
+
     manufatto = get_object_or_404(Manufatto, pk=pk)
     if request.method == 'POST':
         manufatto.delete()
+        messages.success(request, "Manufatto eliminato.")
         return redirect('lista_manufatti')
     return render(request, 'manufatti/conferma_elimina.html', {
-        'manufatto': manufatto,
-        'ente_utente': ente_utente,
+        'manufatto': manufatto, 
+        'ente_utente': ente_utente
     })
 
 

@@ -1,14 +1,27 @@
 {% extends "accounts/base.html" %}
+
 {% block content %}
 <div class="container mt-5">
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    {% endfor %}
+  {% endif %}
+
   <div class="d-flex justify-content-between align-items-center mb-4">
     <h2 class="text-primary">LISTA MANUFATTI</h2>
-    <a href="{% url 'crea_manufatto' %}" class="btn btn-success rounded-pill">➕ Crea nuovo</a>
+    
+    {% if ente_utente == 'TEA' %}
+      <a href="{% url 'crea_manufatto' %}" class="btn btn-success rounded-pill shadow-sm">➕ Crea nuovo</a>
+    {% endif %}
   </div>
 
   <form method="GET" action="{% url 'lista_manufatti' %}" class="mb-4">
     <div class="input-group shadow-sm rounded-pill">
-      <input type="text" name="query" class="form-control rounded-start-pill" placeholder="Cerca manufatto per nome o stato..." value="{{ query|default:'' }}">
+      <input type="text" name="query" class="form-control rounded-start-pill" placeholder="Cerca per nome o stato..." value="{{ query|default:'' }}">
       <button class="btn btn-primary" type="submit">Cerca</button>
       {% if query %}
         <a href="{% url 'lista_manufatti' %}" class="btn btn-outline-danger">Reset</a>
@@ -19,33 +32,37 @@
   {% if manufatti %}
   <div class="list-group shadow-sm mb-4">
     {% for m in manufatti %}
-    <div class="list-group-item">
+    <div class="list-group-item list-group-item-action">
       <div class="d-flex justify-content-between align-items-center">
         <div>
-          <a href="{% url 'dettaglio_manufatto' m.id %}" class="text-decoration-none fw-bold">
+          <a href="{% url 'dettaglio_manufatto' m.id %}" class="text-decoration-none fw-bold text-dark">
             {{ m.nome }}
           </a>
-          <span class="badge bg-secondary ms-2">{{ m.stato }}</span>
+          <span class="badge bg-info text-dark ms-2">{{ m.stato }}</span>
         </div>
+        
         <div>
-          <a href="{% url 'modifica_manufatto' m.id %}" class="btn btn-sm btn-warning rounded-pill me-2">✏️ Modifica</a>
-          <a href="{% url 'elimina_manufatto' m.id %}" class="btn btn-sm btn-danger rounded-pill">🗑️ Elimina</a>
+          {% if ente_utente == 'TEA' %}
+            <a href="{% url 'modifica_manufatto' m.id %}" class="btn btn-sm btn-warning rounded-pill me-2">✏️ Modifica</a>
+            <a href="{% url 'elimina_manufatto' m.id %}" class="btn btn-sm btn-danger rounded-pill">🗑️ Elimina</a>
+          {% else %}
+            <span class="badge rounded-pill bg-light text-muted">Sola lettura</span>
+          {% endif %}
         </div>
       </div>
     </div>
     {% endfor %}
   </div>
   {% else %}
-  <div class="alert alert-info shadow-sm">Nessun manufatto trovato.</div>
+  <div class="alert alert-info shadow-sm text-center">Nessun manufatto trovato.</div>
   {% endif %}
 
-  {% comment %}
-    PULSANT E AGGIORNATO: Ora reindirizza in base alla variabile 'ente_utente' passata dalla view.
-  {% endcomment %}
-  {% if ente_utente == 'AATO' %}
-    <a href="{% url 'aato' %}" class="btn btn-outline-primary rounded-pill">⬅ Torna alla home AATO</a>
-  {% else %}
-    <a href="{% url 'tea' %}" class="btn btn-outline-primary rounded-pill">⬅ Torna alla home TEA</a>
-  {% endif %}
+  <div class="mt-4 border-top pt-3">
+    {% if ente_utente == 'AATO' %}
+      <a href="{% url 'aato' %}" class="btn btn-outline-primary rounded-pill">⬅ Torna alla Home AATO</a>
+    {% else %}
+      <a href="{% url 'tea' %}" class="btn btn-outline-primary rounded-pill">⬅ Torna alla Home TEA</a>
+    {% endif %}
+  </div>
 </div>
 {% endblock %}
