@@ -11,13 +11,11 @@
     </div>
 
     <div class="row">
-        <!-- Colonna Sinistra: Dati Geografici -->
         <div class="col-md-5">
             <div class="card shadow-sm mb-3">
                 <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
                     <h5 class="mb-0"><i class="fas fa-map-marker-alt me-2"></i>Informazioni Geografiche</h5>
                     {% if geografiche %}
-                        <!-- TASTO CORRETTO: Ora usa il modal (popup) -->
                         <button class="btn btn-sm btn-outline-light" data-bs-toggle="modal" data-bs-target="#geoModal">
                             Visualizza Dati
                         </button>
@@ -38,13 +36,13 @@
             </div>
         </div>
 
-        <!-- Colonna Destra: Dati Idrici -->
+        
         <div class="col-md-7">
             <div class="card shadow-sm mb-3">
                 <div class="card-header bg-info text-dark d-flex justify-content-between align-items-center">
                     <h5 class="mb-0"><i class="fas fa-water me-2"></i>Informazioni Idriche</h5>
                     {% if idriche %}
-                        <!-- TASTO CORRETTO: Ora usa il modal (popup) -->
+                        
                         <button class="btn btn-sm btn-outline-dark" data-bs-toggle="modal" data-bs-target="#idricheModal">
                             Visualizza Dati Completi
                         </button>
@@ -88,7 +86,7 @@
 
 </div>
 
-<!-- 🌟 MODAL (POPUP) PER DATI IDRICI (AGGIORNATO) 🌟 -->
+
 {% if idriche %}
 <div class="modal fade" id="idricheModal" tabindex="-1" aria-labelledby="idricheModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-xl modal-dialog-centered"> <!-- Aumentata dimensione a XL -->
@@ -99,7 +97,7 @@
             </div>
             <div class="modal-body" style="font-size: 0.9rem;">
                 <div class="row">
-                    <!-- Colonna 1: M-V -->
+                   
                     <div class="col-md-4">
                         <h6 class="text-info">Dati Idraulici (M-V)</h6>
                         <p><strong>AE CIV:</strong> {{ idriche.ae_civ }}</p>
@@ -113,7 +111,7 @@
                         <p><strong>Qs/Qnm:</strong> {{ idriche.qs_qnm_ratio }}</p>
                         <p><strong>Qs > Pavv:</strong> {{ idriche.qs_gt_pavv }}</p>
                     </div>
-                    <!-- Colonna 2: W-AG -->
+                    
                     <div class="col-md-4">
                         <h6 class="text-info">Dati Idraulici (W-AG)</h6>
                         <p><strong>Qs/Pavv:</strong> {{ idriche.qs_pavv_ratio }}</p>
@@ -128,7 +126,7 @@
                         <p><strong>ha imp:</strong> {{ idriche.ha_imp }} ha</p>
                         <p><strong>Qscolmata:</strong> {{ idriche.qscolmata_ls }} l/s</p>
                     </div>
-                    <!-- 🌟 Colonna 3: NUOVI CAMPI (AH-AO) 🌟 -->
+                    
                     <div class="col-md-4">
                         <h6 class="text-info">Dati Autorizzazioni (AH-AO)</h6>
                         <p><strong>Vasca PTUA:</strong> {{ idriche.vasca_ptua }}</p>
@@ -149,7 +147,7 @@
 </div>
 {% endif %}
 
-<!-- MODAL (POPUP) PER DATI GEOGRAFICI -->
+
 {% if geografiche %}
 <div class="modal fade" id="geoModal" tabindex="-1" aria-labelledby="geoModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
@@ -176,7 +174,7 @@
 {% endblock %}
 
 {% block extra_js %}
-<!-- Assicurati che Bootstrap JS sia caricato (di solito è nel base.html, ma se non c'è, è necessario) -->
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 {% endblock %}
 
