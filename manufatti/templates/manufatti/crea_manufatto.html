@@ -36,11 +36,26 @@
             {{ form_geografiche.as_p }}
         </div>
 
-        <!-- Salva -->
-        <button type="submit" class="btn btn-primary w-100 mt-4">SALVA</button>
+        <button type="submit" class="btn btn-primary w-100 mt-4 rounded-pill shadow-sm">💾 SALVA</button>
     </form>
 
-    <a href="{% url 'lista_manufatti' %}" class="btn btn-outline-primary w-100 mt-3">⬅ Torna alla lista</a>
+    <hr class="my-4">
+
+    <div class="d-grid gap-2">
+        <a href="{% url 'lista_manufatti' %}" class="btn btn-outline-secondary rounded-pill">
+            <i class="fas fa-list me-2"></i>Torna alla lista
+        </a>
+        
+        {% if ente_utente == 'AATO' %}
+            <a href="{% url 'aato' %}" class="btn btn-outline-primary rounded-pill">
+                <i class="fas fa-home me-2"></i>Torna alla Home AATO
+            </a>
+        {% else %}
+            <a href="{% url 'tea' %}" class="btn btn-outline-primary rounded-pill">
+                <i class="fas fa-home me-2"></i>Torna alla Home TEA
+            </a>
+        {% endif %}
+    </div>
 </div>
 
 <script>

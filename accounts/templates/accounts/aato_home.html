@@ -1,47 +1,52 @@
 {% extends "accounts/base.html" %}
 {% load static %}
 
-{% block title %}Home{% endblock %}
+{% block title %}Home AATO{% endblock %}
 
 {% block content %}
 <div class="main-box">
     <h2>Benvenuto {{ user.username }}</h2>
 
-    <a href="{% url 'ricerca_interventi' %}" class="btn btn-primary big-button">Ricerca</a>
-    <a href="{% url 'lista_manufatti' %}" class="btn btn-success big-button">Lista manufatti</a>
-    <a href="{% url 'lista_documenti' %}" class="btn btn-info big-button text-dark">Elenco documenti</a>
-    <a href="{% url 'visualizza_mappa' %}" class="btn btn-warning big-button text-dark">Visualizza mappa</a>
-    <a href="{% url 'logout' %}" class="btn btn-danger rounded-pill">Esci</a>
+    <a href="{% url 'ricerca_interventi' %}" class="btn btn-primary big-button shadow-sm">Ricerca</a>
+    <a href="{% url 'lista_manufatti' %}" class="btn btn-success big-button shadow-sm">Lista manufatti</a>
+    <a href="{% url 'lista_documenti' %}" class="btn btn-info big-button text-dark shadow-sm">Elenco documenti</a>
+    <a href="{% url 'visualizza_mappa' %}" class="btn btn-warning big-button text-dark shadow-sm">Visualizza mappa</a>
+
+    <div class="mt-4">
+        <a href="{% url 'logout' %}" class="btn btn-danger rounded-pill px-4">Esci</a>
+    </div>
 </div>
 
 <style>
     .main-box {
         max-width: 500px;
-        margin: 40px auto;
-        padding: 30px;
+        /* Portato a 5px per il massimo sollevamento */
+        margin: 5px auto 30px auto; 
+        padding: 25px;
         background: white;
         border-radius: 12px;
         text-align: center;
         box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
-        animation: slideInDown 0.8s ease-out;
+        animation: slideInDown 0.5s ease-out;
     }
 
     .main-box h2 {
-        font-size: 2em;
-        margin-bottom: 30px;
+        font-size: 1.8em;
+        margin-bottom: 20px;
     }
 
     .big-button {
-        font-size: 1.2rem;
-        padding: 14px;
+        display: block;
+        font-size: 1.1rem;
+        padding: 12px;
         border-radius: 25px;
-        margin-bottom: 15px;
+        margin-bottom: 12px;
         width: 100%;
     }
 
     @keyframes slideInDown {
         from {
-            transform: translateY(-50px);
+            transform: translateY(-20px);
             opacity: 0;
         }
         to {

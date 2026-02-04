@@ -98,7 +98,11 @@ def dettaglio_manufatto(request, manufatto_id):
 @login_required
 def modifica_manufatto(request, pk):
     ente_utente = get_user_ente(request.user)
-    if ente_utente != 'TEA':
+    
+    # Autorizziamo sia TEA che AATO
+    autorizzati = ['TEA', 'AATO']
+    
+    if ente_utente not in autorizzati:
         messages.error(request, "Accesso negato: non hai i permessi per modificare.")
         return redirect('lista_manufatti')
 
@@ -135,7 +139,9 @@ def modifica_manufatto(request, pk):
 @login_required
 def elimina_manufatto(request, pk):
     ente_utente = get_user_ente(request.user)
-    if ente_utente != 'TEA':
+    
+    # Autorizziamo sia TEA che AATO
+    if ente_utente not in ['TEA', 'AATO']:
         messages.error(request, "Accesso negato: non puoi eliminare manufatti.")
         return redirect('lista_manufatti')
 
@@ -207,11 +213,10 @@ def lista_documenti(request):
 
 @login_required
 def elimina_documento(request, doc_id):
-    documento = get_object_or_404(Documento, id=doc_id)
-    if request.method == 'POST':
-        documento.delete()
-        messages.success(request, 'Documento eliminato correttamente.')
-    return redirect('lista_documenti')
+    ente_utente = get_user_ente(request.user)
+    if ente_utente not in ['TEA', 'AATO']:
+        messages.error(request, "Non hai i permessi per eliminare documenti.")
+        return redirect('lista_documenti')
 
 
 def scarica_documento(request, doc_id):
