@@ -1,4 +1,4 @@
-#!/Users/frank/PycharmProjects/aato_project/AATO_Project/.venv/bin/python
+#!/Users/frank/Documents/aato_project/.venv/bin/python3.14
 import sys
 from django.core.management import execute_from_command_line
 if __name__ == '__main__':

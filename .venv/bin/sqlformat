@@ -1,4 +1,4 @@
-#!/Users/frank/PycharmProjects/aato_project/AATO_Project/.venv/bin/python
+#!/Users/frank/Documents/aato_project/.venv/bin/python3.14
 import sys
 from sqlparse.__main__ import main
 if __name__ == '__main__':

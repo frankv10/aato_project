@@ -5,63 +5,128 @@
 
 {% block content %}
 <div class="main-box" style="
-    max-width: 500px;
-    margin: 40px auto;
-    padding: 30px;
+    max-width: 1000px; /* Ancora un po' più largo per ospitare bene 2 colonne */
+    margin: -70px auto 30px auto; 
+    padding: 25px 40px;
     background: white;
-    border-radius: 12px;
-    text-align: center;
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
     animation: slideInDown 0.8s ease-out;
+    position: relative;
+    z-index: 10;
 ">
-    <h2 style="font-size: 2em; margin-bottom: 30px;">Creazione manufatto</h2>
+    <h2 class="text-center" style="font-size: 2em; margin-bottom: 25px; color: #333; font-weight: bold;">
+        <i class="fas fa-plus-circle text-success me-2"></i>Creazione nuovo manufatto
+    </h2>
 
     <form method="post">
         {% csrf_token %}
 
-        <h4 class="text-start mb-2">Manufatto</h4>
-        {{ form_manufatto.as_p }}
-
-        <button type="button" class="btn btn-outline-secondary w-100 mb-3 py-3"
-                onclick="toggleSection('info-idriche')">INFO IDRAULICHE</button>
-
-        <div id="info-idriche" style="display: none;" class="text-start mb-3">
-            {{ form_idriche.as_p }}
+        <div class="card border-0 bg-light mb-4 shadow-sm">
+            <div class="card-body">
+                <h4 class="text-primary mb-3" style="font-size: 1.2em; border-bottom: 2px solid #0d6efd; display: inline-block; padding-bottom: 5px;">
+                    <i class="fas fa-info-circle me-2"></i>Dati Generali Manufatto
+                </h4>
+                <div class="row text-start">
+                    <div class="form-grid">
+                        {{ form_manufatto }}
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <button type="button" class="btn btn-outline-secondary w-100 mb-3 py-3"
-                onclick="toggleSection('info-geografiche')">INFO GEOGRAFICHE</button>
-
-        <div id="info-geografiche" style="display: none;" class="text-start mb-3">
-            {{ form_geografiche.as_p }}
+        <div class="mb-3">
+            <button type="button" class="btn btn-outline-dark w-100 py-3 fw-bold shadow-sm d-flex justify-content-between align-items-center"
+                    onclick="toggleSection('info-idriche')">
+                <span><i class="fas fa-faucet-drip me-2"></i>INFO IDRAULICHE / SFIORI</span>
+                <i class="fas fa-chevron-down"></i>
+            </button>
+            <div id="info-idriche" style="display: none;" class="text-start mt-2 p-4 border rounded bg-white shadow-sm">
+                <div class="form-grid">
+                    {{ form_idriche }}
+                </div>
+            </div>
         </div>
 
-        <button type="submit" class="btn btn-primary w-100 mt-4 rounded-pill shadow-sm">💾 SALVA</button>
+        <div class="mb-3">
+            <button type="button" class="btn btn-outline-dark w-100 py-3 fw-bold shadow-sm d-flex justify-content-between align-items-center"
+                    onclick="toggleSection('info-geografiche')">
+                <span><i class="fas fa-map-marked-alt me-2"></i>INFO GEOGRAFICHE / GPS</span>
+                <i class="fas fa-chevron-down"></i>
+            </button>
+            <div id="info-geografiche" style="display: none;" class="text-start mt-2 p-4 border rounded bg-white shadow-sm">
+                <div class="form-grid">
+                    {{ form_geografiche }}
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mt-5">
+            <button type="submit" class="btn btn-primary btn-lg rounded-pill shadow px-5 fw-bold">
+                <i class="fas fa-save me-2"></i>SALVA MANUFATTO NEL SISTEMA
+            </button>
+        </div>
     </form>
 
     <hr class="my-4">
 
-    <div class="d-grid gap-2">
-        <a href="{% url 'lista_manufatti' %}" class="btn btn-outline-secondary rounded-pill">
-            <i class="fas fa-list me-2"></i>Torna alla lista
+    <div class="text-center">
+        <a href="{% url 'lista_manufatti' %}" class="btn btn-sm btn-outline-secondary rounded-pill px-4">
+            <i class="fas fa-chevron-left me-1"></i> Torna alla lista completa
         </a>
-        
-        {% if ente_utente == 'AATO' %}
-            <a href="{% url 'aato' %}" class="btn btn-outline-primary rounded-pill">
-                <i class="fas fa-home me-2"></i>Torna alla Home AATO
-            </a>
-        {% else %}
-            <a href="{% url 'tea' %}" class="btn btn-outline-primary rounded-pill">
-                <i class="fas fa-home me-2"></i>Torna alla Home TEA
-            </a>
-        {% endif %}
     </div>
 </div>
 
 <script>
 function toggleSection(id) {
     const section = document.getElementById(id);
-    section.style.display = section.style.display === "none" ? "block" : "none";
+    const icon = event.currentTarget.querySelector('.fa-chevron-down, .fa-chevron-up');
+    
+    if (section.style.display === "none") {
+        section.style.display = "block";
+        section.style.animation = "fadeIn 0.4s ease-out";
+        if(icon) icon.classList.replace('fa-chevron-down', 'fa-chevron-up');
+    } else {
+        section.style.display = "none";
+        if(icon) icon.classList.replace('fa-chevron-up', 'fa-chevron-down');
+    }
 }
 </script>
+
+<style>
+    /* GRIGLIA ORIZZONTALE PER I FORM */
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr); /* Crea due colonne uguali */
+        gap: 15px 30px; /* Spazio tra i campi */
+    }
+
+    /* Stile per le etichette e i campi generati da Django */
+    .form-grid p {
+        margin-bottom: 0;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .form-grid label {
+        font-weight: 600;
+        margin-bottom: 5px;
+        color: #495057;
+    }
+
+    .form-grid input, .form-grid select, .form-grid textarea {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ced4da;
+        border-radius: 6px;
+        background-color: #fff;
+    }
+
+    /* Se un campo deve occupare tutta la larghezza (es. Note) */
+    .form-grid p:last-child:nth-child(odd) {
+        grid-column: span 2;
+    }
+
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+</style>
 {% endblock %}

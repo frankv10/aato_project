@@ -4,9 +4,22 @@
 <div class="container mt-5">
   <div class="d-flex justify-content-between align-items-center mb-4">
     <h2 class="text-primary">LISTA MANUFATTI</h2>
-    {% if ente_utente == 'TEA' or ente_utente == 'AATO' %}
-      <a href="{% url 'crea_manufatto' %}" class="btn btn-success rounded-pill shadow-sm">➕ Crea nuovo</a>
-    {% endif %}
+    
+    <div>
+      {% if ente_utente == 'TEA' or ente_utente == 'AATO' %}
+        <a href="{% url 'export_manufatti' %}" class="btn btn-outline-success rounded-pill shadow-sm me-2">
+            <i class="fas fa-file-excel me-1"></i> Scarica Excel
+        </a>
+
+        <a href="{% url 'import_manufatti' %}" class="btn btn-outline-primary rounded-pill shadow-sm me-2">
+            <i class="fas fa-upload me-1"></i> Carica Modifiche
+        </a>
+
+        <a href="{% url 'crea_manufatto' %}" class="btn btn-success rounded-pill shadow-sm">
+            <i class="fas fa-plus me-1"></i> Crea nuovo
+        </a>
+      {% endif %}
+    </div>
   </div>
 
   <form method="GET" action="{% url 'lista_manufatti' %}" class="mb-4">
@@ -34,8 +47,8 @@
         <div>
           {% if ente_utente == 'TEA' or ente_utente == 'AATO' %}
             <a href="{% url 'modifica_manufatto' m.id %}" class="btn btn-sm btn-warning rounded-pill me-2">✏️ Modifica</a>
-            <a href="{% url 'elimina_manufatto' m.id %}" class="btn btn-sm btn-danger rounded-pill">🗑️ Elimina</a>          
-            {% else %}
+            <a href="{% url 'elimina_manufatto' m.id %}" class="btn btn-sm btn-danger rounded-pill" onclick="return confirm('Sei sicuro di voler eliminare questo manufatto?');">🗑️ Elimina</a>          
+          {% else %}
             <span class="badge rounded-pill bg-light text-muted">Sola lettura</span>
           {% endif %}
         </div>

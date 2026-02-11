@@ -2,25 +2,104 @@
 {% load static %}
 
 {% block content %}
-<h2 style="text-align: center; margin-top: 10px; margin-bottom: 25px;">
-    Mappa della Provincia di Mantova
-</h2>
+<div class="container mt-3">
+    <h2 style="text-align: center; margin-bottom: 25px; font-weight: 800; color: #2c3e50;">
+        Mappa della Provincia di Mantova - Monitoraggio Sfiori
+    </h2>
 
-<div id="map" style="height: 600px; width: 100%;"></div>
+    <div class="map-container shadow">
+        <div id="map"></div>
+    </div>
+</div>
+
+<style>
+    .map-container {
+        border-radius: 25px;
+        overflow: hidden;
+        background: #f8f9fa;
+        border: 1px solid #ddd;
+        margin-bottom: 50px;
+    }
+
+    #map {
+        height: 600px;
+        width: 100%;
+        /* Colore di sfondo neutro durante il caricamento */
+        background-color: #e5e3df; 
+    }
+
+    /* Fix per evitare conflitti grafici con altri CSS */
+    .leaflet-tile-container { 
+        transition: opacity 0.2s linear; 
+    }
+</style>
 {% endblock %}
 
 {% block extra_js %}
-<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-
-<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
-    
-    var map = L.map('map').setView([45.1602, 10.7970], 12);
+    document.addEventListener("DOMContentLoaded", function() {
+        console.log("Inizializzazione mappa in corso...");
 
-    
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: 'Map data © <a href="https://openstreetmap.org">OpenStreetMap</a>',
-    }).addTo(map);
+        // Impostiamo le coordinate centrali (Mantova)
+        var mantovaCoords = [45.1602, 10.7970];
+        
+        // 2. Inizializzazione Mappa
+        var map = L.map('map').setView(mantovaCoords, 10);
+
+        // 3. Tile Layer - Utilizziamo OpenStreetMap standard (più affidabile per il debug)
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        var markersLayer = L.featureGroup().addTo(map);
+
+        // 4. Ciclo Django per i Marker
+        {% for m in manufatti %}
+            {% if m.info_geografiche.latitudine and m.info_geografiche.longitudine %}
+                (function() {
+                    // Pulizia sicura delle stringhe (gestisce virgole e spazi)
+                    var latStr = "{{ m.info_geografiche.latitudine|safe }}".replace(',', '.').trim();
+                    var lngStr = "{{ m.info_geografiche.longitudine|safe }}".replace(',', '.').trim();
+                    
+                    var lat = parseFloat(latStr);
+                    var lng = parseFloat(lngStr);
+
+                    if (!isNaN(lat) && !isNaN(lng)) {
+                        var marker = L.marker([lat, lng]).addTo(markersLayer);
+                        
+                        // Popup migliorato
+                        var popupContent = `
+                            <div style="text-align: center; min-width: 150px;">
+                                <strong style="color: #2c3e50; font-size: 14px;">{{ m.nome|escapejs }}</strong><br>
+                                <span style="font-size: 12px; color: #7f8c8d;">{{ m.comune|escapejs }}</span><br>
+                                <hr style="margin: 8px 0;">
+                                <a href="{% url 'dettaglio_manufatto' m.id %}" 
+                                   class="btn btn-primary btn-sm text-white" 
+                                   style="padding: 4px 12px; border-radius: 8px; text-decoration: none; display: inline-block; background-color: #007bff;">
+                                   Vedi Dettagli
+                                </a>
+                            </div>
+                        `;
+                        marker.bindPopup(popupContent);
+                    }
+                })();
+            {% endif %}
+        {% endfor %}
+
+        // 5. Adattamento automatico dello zoom se ci sono marker
+        if (markersLayer.getBounds().isValid()) {
+            map.fitBounds(markersLayer.getBounds(), {padding: [50, 50]});
+        }
+
+        // 6. Fix per il problema del contenitore grigio (ricalcolo dimensioni)
+        setTimeout(function() {
+            map.invalidateSize();
+            console.log("Mappa ricalcolata.");
+        }, 500);
+    });
 </script>
 {% endblock %}

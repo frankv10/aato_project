@@ -5,60 +5,78 @@
 
 {% block content %}
 <div class="login-container d-flex justify-content-center">
-    <div class="login-box shadow text-center p-4">
-        <h2 class="mb-4">Login</h2>
+    <div class="login-box shadow-lg text-center p-5">
+        <i class="fas fa-lock fa-3x text-primary mb-4"></i>
+        <h2 class="mb-4">Area Riservata</h2>
 
+        {# Nota: I messaggi ora sono gestiti dal base.html, ma teniamo questo per errori di login rapidi #}
         {% if messages %}
             {% for message in messages %}
-                <p class="text-danger">{{ message }}</p>
+                <div class="alert alert-danger rounded-pill py-1"><small>{{ message }}</small></div>
             {% endfor %}
         {% endif %}
 
         <form method="post">
             {% csrf_token %}
             <div class="mb-3 text-start">
-                <label for="username" class="form-label">Utente</label>
-                <input type="text" name="username" class="form-control rounded-pill" placeholder="Inserisci il nome utente">
+                <label class="form-label ps-3"><small>Utente</small></label>
+                <input type="text" name="username" class="form-control rounded-pill px-4" placeholder="Nome utente">
             </div>
-            <div class="mb-3 text-start">
-                <label for="password" class="form-label">Password</label>
-                <div class="d-flex align-items-center">
-                    <input type="password" name="password" id="passwordField" class="form-control rounded-pill">
-                    <button type="button" class="btn btn-outline-secondary rounded-pill ms-3" onclick="togglePassword()">Mostra</button>
+            <div class="mb-4 text-start">
+                <label class="form-label ps-3"><small>Password</small></label>
+                <div class="input-group">
+                    <input type="password" name="password" id="passwordField" class="form-control rounded-pill-start px-4" placeholder="••••••••">
+                    <button class="btn btn-outline-secondary rounded-pill-end" type="button" onclick="togglePassword()">
+                        <i class="fas fa-eye"></i>
+                    </button>
                 </div>
             </div>
-            <button type="submit" class="btn btn-primary w-100 rounded-pill py-2 mb-2">Entra</button>
+            <button type="submit" class="btn btn-primary w-100 rounded-pill py-3 mb-3 shadow-sm fw-bold">Entra nel sistema</button>
 
-            <a href="{% url 'registrazione' %}" class="btn btn-success w-100 rounded-pill py-2">Registrati</a>
+            <hr class="my-4 opacity-25">
+            
+            <p class="text-muted small">Non hai un account?</p>
+            <a href="{% url 'registrazione' %}" class="btn btn-outline-success w-100 rounded-pill py-2 fw-bold">Richiedi Registrazione</a>
         </form>
     </div>
 </div>
 
 <style>
     .login-container {
-        /* Ridotta l'altezza minima e aumentato il margine superiore per posizionarlo in alto con precisione */
         min-height: 40vh; 
-        margin-top: 50px; 
     }
 
     .login-box {
         width: 100%;
-        max-width: 400px;
+        max-width: 420px;
         background: white;
-        border-radius: 20px;
-        /* L'animazione parte da un po' più in alto per coerenza */
-        animation: slideInDown 0.8s ease-out;
+        /* --- ALTEZZA MASSIMA: Margine -160px --- */
+        margin-top: -160px; 
+        border-radius: 40px;
+        animation: slideInDown 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        position: relative;
+        z-index: 100;
     }
 
+    .rounded-pill-start {
+        border-top-left-radius: 50px !important;
+        border-bottom-left-radius: 50px !important;
+        border-top-right-radius: 0 !important;
+        border-bottom-right-radius: 0 !important;
+    }
+
+    .rounded-pill-end {
+        border-top-right-radius: 50px !important;
+        border-bottom-right-radius: 50px !important;
+        border-top-left-radius: 0 !important;
+        border-bottom-left-radius: 0 !important;
+    }
+
+    h2 { font-weight: 800; color: #2c3e50; }
+
     @keyframes slideInDown {
-        from {
-            transform: translateY(-30px);
-            opacity: 0;
-        }
-        to {
-            transform: translateY(0);
-            opacity: 1;
-        }
+        from { transform: translateY(-60px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
     }
 </style>
 

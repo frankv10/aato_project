@@ -13,6 +13,8 @@ urlpatterns = [
     path('documenti/<int:doc_id>/elimina/', views.elimina_documento, name='elimina_documento'),
     path('scarica/<int:doc_id>/', views.scarica_documento, name='scarica_documento'),
     path('ricerca/', views.ricerca_interventi, name='ricerca_interventi'),
+    path('export/', views.export_manufatti, name='export_manufatti'),
+    path('import/', views.import_manufatti, name='import_manufatti'),
 
     # --- RIGHE RIMOSSE ---
     # Le seguenti righe sono state rimosse per evitare l'errore "pagina bianca"

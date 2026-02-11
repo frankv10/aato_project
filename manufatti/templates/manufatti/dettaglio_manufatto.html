@@ -3,9 +3,7 @@
 {% block title %}Dettaglio {{ manufatto.nome }}{% endblock %}
 
 {% block content %}
-<div class="container mt-4 mb-5">
-
-    <div class="d-flex justify-content-between align-items-center mb-4">
+<div class="container detail-wrapper mb-5"> <div class="d-flex justify-content-between align-items-center mb-4 mt-2">
         <div>
             <h2 class="text-primary mb-0">Dettaglio Manufatto: <strong>{{ manufatto.nome }}</strong></h2>
             <small class="text-muted">Creato il: {{ manufatto.data_creazione|date:"d/m/Y" }}</small>
@@ -15,11 +13,11 @@
 
     <div class="row">
         <div class="col-md-5">
-            <div class="card shadow-sm mb-3 border-0">
-                <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0"><i class="fas fa-map-marker-alt me-2"></i>Localizzazione</h5>
+            <div class="card shadow-sm mb-3 border-0 rounded-4">
+                <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center rounded-top-4">
+                    <h5 class="mb-0 small-caps"><i class="fas fa-map-marker-alt me-2"></i>Localizzazione</h5>
                     {% if geografiche %}
-                        <button class="btn btn-sm btn-outline-light rounded-pill" data-bs-toggle="modal" data-bs-target="#geoModal">Tutti i dati</button>
+                        <button class="btn btn-sm btn-outline-light rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#geoModal">Tutti i dati</button>
                     {% endif %}
                 </div>
                 <div class="card-body">
@@ -34,11 +32,11 @@
         </div>
 
         <div class="col-md-7">
-            <div class="card shadow-sm mb-3 border-0">
-                <div class="card-header bg-info text-dark d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0"><i class="fas fa-water me-2"></i>Sintesi Idraulica</h5>
+            <div class="card shadow-sm mb-3 border-0 rounded-4">
+                <div class="card-header bg-info text-dark d-flex justify-content-between align-items-center rounded-top-4">
+                    <h5 class="mb-0 small-caps"><i class="fas fa-water me-2"></i>Sintesi Idraulica</h5>
                     {% if idriche %}
-                        <button class="btn btn-sm btn-outline-dark rounded-pill" data-bs-toggle="modal" data-bs-target="#idricheModal">Visualizza Dati Completi</button>
+                        <button class="btn btn-sm btn-outline-dark rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#idricheModal">Visualizza Dati Completi</button>
                     {% endif %}
                 </div>
                 <div class="card-body">
@@ -50,7 +48,7 @@
                         <div class="col-6">
                             <p><strong>Abitanti Equiv. TOT:</strong> {{ idriche.ae_tot|default:"0" }}</p>
                             <p><strong>Conforme:</strong> 
-                                <span class="badge {% if idriche.e_conforme == 'SI' %}bg-success{% else %}bg-danger{% endif %}">
+                                <span class="badge {% if idriche.e_conforme == 'SI' %}bg-success{% else %}bg-danger{% endif %} rounded-pill px-3">
                                     {{ idriche.e_conforme|default:"-" }}
                                 </span>
                             </p>
@@ -68,9 +66,9 @@
             <i class="fas fa-arrow-left me-2"></i>Torna alla Lista
         </a>
 
-        <div>
+        <div class="d-flex gap-2">
             {% if ente_utente == 'TEA' or ente_utente == 'AATO' %}
-                <a href="{% url 'modifica_manufatto' manufatto.id %}" class="btn btn-warning rounded-pill px-4 me-2 shadow-sm">
+                <a href="{% url 'modifica_manufatto' manufatto.id %}" class="btn btn-warning rounded-pill px-4 shadow-sm fw-bold">
                     <i class="fas fa-edit me-2"></i>Modifica
                 </a>
             {% endif %}
@@ -91,9 +89,38 @@
     </div>
 </div>
 
+<style>
+    /* 1. Spingiamo giù il contenuto principale per non farlo finire sotto la testata */
+    .detail-wrapper {
+        margin-top: 20px !important;
+        position: relative;
+        z-index: 10;
+    }
+
+    /* 2. FIX PER IL MODAL TAGLIATO: Centra il modal e aggiunge spazio sopra */
+    .modal-dialog {
+        display: flex;
+        align-items: center;
+        min-height: calc(100% - 3.5rem);
+        margin-top: 50px; /* Forza il distanziamento dall'alto */
+    }
+
+    .modal-content {
+        border-radius: 25px !important;
+        overflow: hidden;
+    }
+
+    .card-header { font-weight: bold; }
+    .small-caps { font-variant: small-caps; letter-spacing: 1px; }
+    
+    /* Uniformiamo i bordi arrotondati */
+    .rounded-4 { border-radius: 20px !important; }
+    .rounded-top-4 { border-top-left-radius: 20px !important; border-top-right-radius: 20px !important; }
+</style>
+
 <div class="modal fade" id="geoModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content border-0 shadow">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
             <div class="modal-header bg-dark text-white">
                 <h5 class="modal-title"><i class="fas fa-map-marked-alt me-2"></i>Dati Geografici e Anagrafici</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -106,19 +133,12 @@
                         <p><strong>Località:</strong> {{ manufatto.localita|default:"-" }}</p>
                         <p><strong>Ubicazione:</strong> {{ manufatto.ubicazione|default:"-" }}</p>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-6 text-center">
                         <h6 class="text-muted text-uppercase small fw-bold">Coordinate</h6>
-                        <p><strong>Latitudine:</strong> {{ geografiche.latitudine|default:"-" }}</p>
-                        <p><strong>Longitudine:</strong> {{ geografiche.longitudine|default:"-" }}</p>
-                    </div>
-                </div>
-                <hr>
-                <div class="row">
-                    <div class="col-md-12">
-                        <h6 class="text-muted text-uppercase small fw-bold">Dati Impianto</h6>
-                        <p><strong>Depuratore Associato:</strong> {{ manufatto.depuratore_associato|default:"-" }}</p>
-                        <p><strong>Recapito Emissario:</strong> {{ manufatto.recapito_emissario|default:"-" }}</p>
-                        <p><strong>Tipologia Sfioratore:</strong> {{ manufatto.tipologia_sfioratore|default:"-" }}</p>
+                        <div class="bg-light p-3 rounded-4 border">
+                             <p class="mb-1"><strong>Lat:</strong> {{ geografiche.latitudine|default:"-" }}</p>
+                             <p class="mb-0"><strong>Lon:</strong> {{ geografiche.longitudine|default:"-" }}</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -127,8 +147,8 @@
 </div>
 
 <div class="modal fade" id="idricheModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-xl">
-        <div class="modal-content border-0 shadow">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
             <div class="modal-header bg-info text-dark">
                 <h5 class="modal-title"><i class="fas fa-tint me-2"></i>Dati Idraulici e Autorizzazioni</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -167,7 +187,7 @@
                     </div>
                 </div>
 
-                <div class="mt-4 p-3 bg-light rounded border">
+                <div class="mt-4 p-3 bg-light rounded-4 border">
                     <h6 class="fw-bold mb-2">Note Autorizzazioni / Concessioni:</h6>
                     <p class="mb-0 text-dark">{{ idriche.note_autorizzazioni|linebreaks|default:"Nessuna nota presente." }}</p>
                 </div>
