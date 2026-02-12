@@ -353,75 +353,151 @@ def export_manufatti(request):
     return response
 
 # --- FUNZIONE IMPORTA EXCEL ---
+
+# In views.py
+import pandas as pd
+from django.contrib import messages
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from .models import Manufatto, info_idriche, info_geografiche
+
+# In views.py
+import pandas as pd
+from django.contrib import messages
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from .models import Manufatto, info_idriche, info_geografiche
+
+# In views.py
+import pandas as pd
+from django.contrib import messages
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from .models import Manufatto, info_idriche, info_geografiche
+
 @login_required
 def import_manufatti(request):
     if request.method == 'POST' and request.FILES.get('myfile'):
         excel_file = request.FILES['myfile']
         
         try:
-            df = pd.read_excel(excel_file)
-            # Sostituisce i valori nan con None (altrimenti Django si arrabbia con i float)
-            df = df.where(pd.notnull(df), None)
+            # 1. Reset completo del database prima dell'importazione
+            Manufatto.objects.all().delete()
+            
+            xls = pd.ExcelFile(excel_file)
+            sheets = xls.sheet_names
+            
+            # Cerchiamo il foglio più completo
+            target_sheet = next((s for s in sheets if 'riassuntiva' in s.lower() or 'sipiui' in s.lower()), sheets[0])
+            
+            df_finale = None
+            start_row = 0
+            
+            # Scansione per trovare la riga di intestazione
+            df_raw = pd.read_excel(excel_file, sheet_name=target_sheet, header=None)
+            for i in range(min(100, len(df_raw))):
+                row_values = [str(val).lower().strip() for val in df_raw.iloc[i].values]
+                if 'codice' in row_values or 'coordinate' in row_values:
+                    start_row = i
+                    df_finale = pd.read_excel(excel_file, sheet_name=target_sheet, header=i)
+                    break
 
-            count_created = 0
-            count_updated = 0
+            if df_finale is None:
+                messages.error(request, "Impossibile trovare le intestazioni 'Codice' o 'Coordinate'.")
+                return redirect('import_manufatti')
 
-            for index, row in df.iterrows():
-                nome = row.get('NOME')
-                if not nome:
-                    continue # Salta righe senza nome
+            # 2. Pulizia nomi colonne
+            def clean_col(col):
+                if pd.isna(col): return ""
+                return " ".join(str(col).lower().strip().replace('[', '').replace(']', '').split())
 
-                # 1. Aggiorna o Crea Manufatto
-                manufatto, created = Manufatto.objects.update_or_create(
+            df_finale.columns = [clean_col(c) for c in df_finale.columns]
+            df_finale = df_finale.where(pd.notnull(df_finale), None)
+
+            # Funzioni helper per la conversione dati
+            def safe_float(val):
+                if val is None or str(val).strip() == "" or str(val).strip() == "-": return None
+                try: return float(str(val).replace(',', '.'))
+                except: return None
+
+            def get_val(row, keys):
+                for k in keys:
+                    if k in row and row[k] is not None: return row[k]
+                return None
+
+            count = 0
+            for index, row in df_finale.iterrows():
+                nome = str(row.get('codice', '')).strip()
+                if not nome or nome == "None" or nome == "nan": continue
+
+                # A. Creazione Manufatto
+                manufatto = Manufatto.objects.create(
                     nome=nome,
-                    defaults={
-                        'stato': row.get('STATO'),
-                        'comune': row.get('COMUNE'),
-                        'localita': row.get('LOCALITA'),
-                        'ubicazione': row.get('UBICAZIONE'),
-                        'depuratore_associato': row.get('DEPURATORE'),
-                        'recapito_emissario': row.get('EMISSARIO'),
-                        'tipologia_sfioratore': row.get('TIPOLOGIA'),
-                    }
+                    stato=row.get('stato', 'PROGRAMMATO'),
+                    comune=row.get('comune'),
+                    localita=row.get('localita') or row.get('località'),
+                    ubicazione=row.get('ubicazione'),
+                    depuratore_associato=row.get('depuratore associato') or row.get('depuratore'),
+                    recapito_emissario=row.get('recapito emissario') or row.get('emissario'),
+                    tipologia_sfioratore=row.get('tipo') or row.get('tipologia')
                 )
+                count += 1
 
-                if created: count_created += 1
-                else: count_updated += 1
+                # B. Gestione Coordinate (Split della stringa "Lat, Lon")
+                lat, lon = None, None
+                coord_raw = row.get('coordinate')
+                if coord_raw and ',' in str(coord_raw):
+                    parts = str(coord_raw).split(',')
+                    lat = safe_float(parts[0])
+                    lon = safe_float(parts[1])
+                else:
+                    lat = safe_float(row.get('lat')) or safe_float(row.get('latitudine'))
+                    lon = safe_float(row.get('lon')) or safe_float(row.get('longitudine'))
 
-                # 2. Aggiorna Info Geografiche
-                info_geografiche.objects.update_or_create(
+                info_geografiche.objects.create(
                     manufatto=manufatto,
-                    defaults={
-                        'latitudine': row.get('LATITUDINE'),
-                        'longitudine': row.get('LONGITUDINE'),
-                    }
+                    latitudine=lat,
+                    longitudine=lon
                 )
 
-                # 3. Aggiorna Info Idriche
-                info_idriche.objects.update_or_create(
+                # C. Info Idriche con mappatura precisa
+                info_idriche.objects.create(
                     manufatto=manufatto,
-                    defaults={
-                        'ae_tot': row.get('AE_TOT'),
-                        'qnm': row.get('QNM'),
-                        'qs': row.get('QS'),
-                        'ae_civ': row.get('AE_CIV'),
-                        'ae_ind': row.get('AE_IND'),
-                        'e_conforme': row.get('CONFORME'),
-                        'vasca_ptua': row.get('VASCA_PTUA'),
-                        'consorzio_competente': row.get('CONSORZIO'),
-                        'atto_provincia_n': row.get('ATTO_PROVINCIA'),
-                        'scadenza_autorizzazione': row.get('SCADENZA_PROV'),
-                        'atto_consorzio_n': row.get('ATTO_CONSORZIO'),
-                        'scadenza_concessione': row.get('SCADENZA_CONS'),
-                        'note_autorizzazioni': row.get('NOTE_AUTORIZZAZIONI'),
-                    }
+                    ae_civ=safe_float(row.get('ae civ')),
+                    ae_ind=safe_float(row.get('ae ind')),
+                    ae_tot=safe_float(row.get('ae tot')),
+                    q_civ=safe_float(row.get('q civ')),
+                    q_ind=safe_float(row.get('q ind')),
+                    qnm=safe_float(row.get('qnm')),
+                    qs=safe_float(row.get('qs')),
+                    pavv=safe_float(row.get('pavv')),
+                    qs_qnm_ratio=row.get('qs/qnm'),
+                    qs_gt_pavv=row.get('qs > pavv') or row.get('qs>pavv'),
+                    qs_pavv_ratio=row.get('qs/pavv'),
+                    tipologia_sfioro_rr6=row.get('tipologia'),
+                    e_conforme=row.get('è conforme?') or row.get('conforme'),
+                    vasca_reg_regionale=row.get('vasca reg regionale'),
+                    bacino_proprio_ha=safe_float(row.get('bacino proprio ha')),
+                    q_meteo_ingresso_ls=safe_float(row.get('q meteo in ingresso al manufatto l/s')),
+                    q_limite_ingresso_ls=safe_float(row.get('q limite ingresso al manufatto l/s')),
+                    manufatto_limitante=row.get('manufatto limitante'),
+                    portata_specifica_scarico=safe_float(row.get('portata specifica allo scarico l/s haimp')),
+                    ha_imp=safe_float(row.get('ha imp')),
+                    qscolmata_ls=safe_float(row.get('qscolmata l/s')),
+                    vasca_ptua=row.get('vasca ptua'),
+                    scadenza_autorizzazione=row.get('scadenza autorizzazione provincia'),
+                    atto_provincia_n=row.get('atto provincia n°') or row.get('atto provincia'),
+                    consorzio_competente=row.get('consorzio competente'),
+                    scadenza_concessione=row.get('scadenza concessione consorzio'),
+                    atto_consorzio_n=row.get('atto consorzio n°') or row.get('atto consorzio'),
+                    note_autorizzazioni=row.get('note autorizzazioni /concessioni') or row.get('note')
                 )
 
-            messages.success(request, f'Importazione completata: {count_created} creati, {count_updated} aggiornati.')
+            messages.success(request, f"Importazione completata con successo: {count} manufatti caricati.")
             return redirect('lista_manufatti')
 
         except Exception as e:
-            messages.error(request, f"Errore durante l'importazione: {e}")
+            messages.error(request, f"Errore durante l'importazione: {str(e)}")
             return redirect('import_manufatti')
 
     return render(request, 'manufatti/upload_excel.html')

@@ -3,7 +3,9 @@
 {% block title %}Dettaglio {{ manufatto.nome }}{% endblock %}
 
 {% block content %}
-<div class="container detail-wrapper mb-5"> <div class="d-flex justify-content-between align-items-center mb-4 mt-2">
+<div class="container detail-wrapper mb-5">
+    
+    <div class="d-flex justify-content-between align-items-center mb-4 mt-2">
         <div>
             <h2 class="text-primary mb-0">Dettaglio Manufatto: <strong>{{ manufatto.nome }}</strong></h2>
             <small class="text-muted">Creato il: {{ manufatto.data_creazione|date:"d/m/Y" }}</small>
@@ -13,11 +15,11 @@
 
     <div class="row">
         <div class="col-md-5">
-            <div class="card shadow-sm mb-3 border-0 rounded-4">
+            <div class="card shadow-sm mb-3 border-0 rounded-4 h-100">
                 <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center rounded-top-4">
                     <h5 class="mb-0 small-caps"><i class="fas fa-map-marker-alt me-2"></i>Localizzazione</h5>
                     {% if geografiche %}
-                        <button class="btn btn-sm btn-outline-light rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#geoModal">Tutti i dati</button>
+                        <button class="btn btn-sm btn-outline-light rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#geoModal">Mappa & Dati</button>
                     {% endif %}
                 </div>
                 <div class="card-body">
@@ -25,31 +27,37 @@
                     <p><strong>Località:</strong> {{ manufatto.localita|default:"-" }}</p>
                     <p><strong>Ubicazione:</strong> {{ manufatto.ubicazione|default:"-" }}</p>
                     <hr>
-                    <p><strong>Latitudine:</strong> {{ geografiche.latitudine|default:"-" }}</p>
-                    <p><strong>Longitudine:</strong> {{ geografiche.longitudine|default:"-" }}</p>
+                    <div class="d-flex justify-content-between">
+                        <span><strong>Lat:</strong> {{ geografiche.latitudine|default:"-" }}</span>
+                        <span><strong>Lon:</strong> {{ geografiche.longitudine|default:"-" }}</span>
+                    </div>
                 </div>
             </div>
         </div>
 
         <div class="col-md-7">
-            <div class="card shadow-sm mb-3 border-0 rounded-4">
+            <div class="card shadow-sm mb-3 border-0 rounded-4 h-100">
                 <div class="card-header bg-info text-dark d-flex justify-content-between align-items-center rounded-top-4">
-                    <h5 class="mb-0 small-caps"><i class="fas fa-water me-2"></i>Sintesi Idraulica</h5>
+                    <h5 class="mb-0 small-caps"><i class="fas fa-water me-2"></i>Sintesi Tecnica</h5>
                     {% if idriche %}
-                        <button class="btn btn-sm btn-outline-dark rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#idricheModal">Visualizza Dati Completi</button>
+                        <button class="btn btn-sm btn-outline-dark rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#idricheModal"> Scheda Tecnica Completa</button>
                     {% endif %}
                 </div>
                 <div class="card-body">
-                    <div class="row">
-                        <div class="col-6">
-                            <p><strong>Portata Nera (Qnm):</strong> {{ idriche.qnm|default:"0" }} l/s</p>
-                            <p><strong>Portata Soglia (Qs):</strong> {{ idriche.qs|default:"0" }} l/s</p>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <h6 class="text-muted text-uppercase small fw-bold">Rete Fognaria</h6>
+                            <p class="mb-1"><strong>Depuratore:</strong> {{ manufatto.depuratore_associato|default:"-" }}</p>
+                            <p class="mb-1"><strong>Emissario:</strong> {{ manufatto.recapito_emissario|default:"-" }}</p>
+                            <p class="mb-0"><strong>Tipologia:</strong> {{ manufatto.tipologia_sfioratore|default:"-" }}</p>
                         </div>
-                        <div class="col-6">
-                            <p><strong>Abitanti Equiv. TOT:</strong> {{ idriche.ae_tot|default:"0" }}</p>
-                            <p><strong>Conforme:</strong> 
-                                <span class="badge {% if idriche.e_conforme == 'SI' %}bg-success{% else %}bg-danger{% endif %} rounded-pill px-3">
-                                    {{ idriche.e_conforme|default:"-" }}
+                        <div class="col-md-6 border-start">
+                            <h6 class="text-muted text-uppercase small fw-bold">Carico Principale</h6>
+                            <p class="mb-1"><strong>AE Totali:</strong> <span class="fw-bold">{{ idriche.ae_tot|default:"0" }}</span></p>
+                            <p class="mb-1"><strong>Qnm:</strong> {{ idriche.qnm|default:"0" }} l/s</p>
+                            <p class="mb-0"><strong>Conformità:</strong> 
+                                <span class="badge {% if idriche.e_conforme == 'SI' %}bg-success{% else %}bg-danger{% endif %} rounded-pill">
+                                    {{ idriche.e_conforme|default:"NON DEFINITO" }}
                                 </span>
                             </p>
                         </div>
@@ -59,9 +67,7 @@
         </div>
     </div>
 
-    <hr class="my-4">
-
-    <div class="d-flex justify-content-between align-items-center mb-5">
+    <div class="d-flex justify-content-between align-items-center mt-5 mb-5">
         <a href="{% url 'lista_manufatti' %}" class="btn btn-outline-secondary rounded-pill px-4 shadow-sm">
             <i class="fas fa-arrow-left me-2"></i>Torna alla Lista
         </a>
@@ -90,54 +96,58 @@
 </div>
 
 <style>
-    /* 1. Spingiamo giù il contenuto principale per non farlo finire sotto la testata */
     .detail-wrapper {
         margin-top: 20px !important;
         position: relative;
         z-index: 10;
     }
-
-    /* 2. FIX PER IL MODAL TAGLIATO: Centra il modal e aggiunge spazio sopra */
     .modal-dialog {
         display: flex;
         align-items: center;
         min-height: calc(100% - 3.5rem);
-        margin-top: 50px; /* Forza il distanziamento dall'alto */
+        padding-top: 20px;
+        padding-bottom: 20px;
     }
-
     .modal-content {
         border-radius: 25px !important;
         overflow: hidden;
     }
-
     .card-header { font-weight: bold; }
     .small-caps { font-variant: small-caps; letter-spacing: 1px; }
-    
-    /* Uniformiamo i bordi arrotondati */
     .rounded-4 { border-radius: 20px !important; }
     .rounded-top-4 { border-top-left-radius: 20px !important; border-top-right-radius: 20px !important; }
+    
+    /* Stili per le liste nel modal */
+    .data-list p {
+        margin-bottom: 0.5rem;
+        border-bottom: 1px solid #f0f0f0;
+        padding-bottom: 0.2rem;
+    }
+    .data-list strong {
+        color: #555;
+    }
 </style>
 
 <div class="modal fade" id="geoModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg">
             <div class="modal-header bg-dark text-white">
-                <h5 class="modal-title"><i class="fas fa-map-marked-alt me-2"></i>Dati Geografici e Anagrafici</h5>
+                <h5 class="modal-title"><i class="fas fa-map-marked-alt me-2"></i>Dati Geografici Completi</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <div class="row">
                     <div class="col-md-6 border-end">
-                        <h6 class="text-muted text-uppercase small fw-bold">Ubicazione</h6>
+                        <h6 class="text-muted text-uppercase small fw-bold">Riferimenti Amministrativi</h6>
                         <p><strong>Comune:</strong> {{ manufatto.comune|default:"-" }}</p>
                         <p><strong>Località:</strong> {{ manufatto.localita|default:"-" }}</p>
                         <p><strong>Ubicazione:</strong> {{ manufatto.ubicazione|default:"-" }}</p>
                     </div>
-                    <div class="col-md-6 text-center">
-                        <h6 class="text-muted text-uppercase small fw-bold">Coordinate</h6>
-                        <div class="bg-light p-3 rounded-4 border">
-                             <p class="mb-1"><strong>Lat:</strong> {{ geografiche.latitudine|default:"-" }}</p>
-                             <p class="mb-0"><strong>Lon:</strong> {{ geografiche.longitudine|default:"-" }}</p>
+                    <div class="col-md-6">
+                        <h6 class="text-muted text-uppercase small fw-bold">Coordinate GPS</h6>
+                        <div class="bg-light p-3 rounded-4 border text-center">
+                             <p class="mb-1 fs-5"><strong>Lat:</strong> {{ geografiche.latitudine|default:"-" }}</p>
+                             <p class="mb-0 fs-5"><strong>Lon:</strong> {{ geografiche.longitudine|default:"-" }}</p>
                         </div>
                     </div>
                 </div>
@@ -147,53 +157,81 @@
 </div>
 
 <div class="modal fade" id="idricheModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content border-0 shadow-lg">
             <div class="modal-header bg-info text-dark">
-                <h5 class="modal-title"><i class="fas fa-tint me-2"></i>Dati Idraulici e Autorizzazioni</h5>
+                <h5 class="modal-title"><i class="fas fa-table me-2"></i>Scheda Tecnica e Amministrativa Completa</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body" style="font-size: 0.95rem;">
+            <div class="modal-body bg-white" style="font-size: 0.9rem;">
+                
                 <div class="row g-4">
-                    <div class="col-md-4 border-end">
-                        <h6 class="text-info fw-bold mb-3 border-bottom pb-2">CARICHI E PORTATE</h6>
-                        <p><strong>AE CIV:</strong> {{ idriche.ae_civ|default:"0" }}</p>
-                        <p><strong>AE IND:</strong> {{ idriche.ae_ind|default:"0" }}</p>
-                        <p><strong>AE TOT:</strong> {{ idriche.ae_tot|default:"0" }}</p>
-                        <p><strong>Qnm (l/s):</strong> {{ idriche.qnm|default:"0" }}</p>
-                        <p><strong>Qs (l/s):</strong> {{ idriche.qs|default:"0" }}</p>
-                        <p><strong>Pavv:</strong> {{ idriche.pavv|default:"-" }}</p>
-                        <p><strong>Rapporto Qs/Qnm:</strong> {{ idriche.qs_qnm_ratio|default:"-" }}</p>
+                    <div class="col-lg-4 border-end data-list">
+                        <div class="bg-light p-2 rounded mb-2"><h6 class="text-primary fw-bold mb-0">1. CARICHI E PORTATE</h6></div>
+                        
+                        <p><strong>AE Civili:</strong> {{ idriche.ae_civ|default:"-" }}</p>
+                        <p><strong>AE Industriali:</strong> {{ idriche.ae_ind|default:"-" }}</p>
+                        <p><strong>AE Totali:</strong> {{ idriche.ae_tot|default:"-" }}</p>
+                        <div class="my-3 border-top"></div>
+                        <p><strong>Q Civile (l/s):</strong> {{ idriche.q_civ|default:"-" }}</p>
+                        <p><strong>Q Industriale (l/s):</strong> {{ idriche.q_ind|default:"-" }}</p>
+                        <p><strong>Q Nera Media (Qnm):</strong> {{ idriche.qnm|default:"-" }}</p>
+                        <p><strong>Q Soglia (Qs):</strong> {{ idriche.qs|default:"-" }}</p>
+                        <p><strong>P avviamento (Pavv):</strong> {{ idriche.pavv|default:"-" }}</p>
+                        <div class="my-3 border-top"></div>
+                        <p><strong>Q Meteo Ingresso:</strong> {{ idriche.q_meteo_ingresso_ls|default:"-" }}</p>
+                        <p><strong>Q Limite Ingresso:</strong> {{ idriche.q_limite_ingresso_ls|default:"-" }}</p>
                     </div>
 
-                    <div class="col-md-4 border-end">
-                        <h6 class="text-info fw-bold mb-3 border-bottom pb-2">DATI TECNICI</h6>
+                    <div class="col-lg-4 border-end data-list">
+                        <div class="bg-light p-2 rounded mb-2"><h6 class="text-primary fw-bold mb-0">2. DIMENSIONAMENTO & VERIFICHE</h6></div>
+
+                        <p><strong>Rapporto Qs/Qnm:</strong> {{ idriche.qs_qnm_ratio|default:"-" }}</p>
+                        <p><strong>Verifica Qs > Pavv:</strong> {{ idriche.qs_gt_pavv|default:"-" }}</p>
+                        <p><strong>Rapporto Qs/Pavv:</strong> {{ idriche.qs_pavv_ratio|default:"-" }}</p>
+                        <div class="my-3 border-top"></div>
                         <p><strong>Tipologia RR6:</strong> {{ idriche.tipologia_sfioro_rr6|default:"-" }}</p>
-                        <p><strong>Conforme:</strong> {{ idriche.e_conforme|default:"-" }}</p>
-                        <p><strong>Bacino proprio (ha):</strong> {{ idriche.bacino_proprio_ha|default:"-" }}</p>
-                        <p><strong>ha imp:</strong> {{ idriche.ha_imp|default:"-" }}</p>
-                        <p><strong>Q scolmata (l/s):</strong> {{ idriche.qscolmata_ls|default:"-" }}</p>
+                        <p><strong>Stato Conformità:</strong> <span class="fw-bold">{{ idriche.e_conforme|default:"-" }}</span></p>
+                        <div class="my-3 border-top"></div>
+                        <p><strong>Vasca Reg. Regionale:</strong> {{ idriche.vasca_reg_regionale|default:"-" }}</p>
+                        <p><strong>Bacino Proprio (ha):</strong> {{ idriche.bacino_proprio_ha|default:"-" }}</p>
+                        <p><strong>Ettari Impermeabili (ha imp):</strong> {{ idriche.ha_imp|default:"-" }}</p>
+                        <p><strong>Portata Specifica Scarico:</strong> {{ idriche.portata_specifica_scarico|default:"-" }}</p>
+                        <p><strong>Q Scolmata (l/s):</strong> {{ idriche.qscolmata_ls|default:"-" }}</p>
                         <p><strong>Manufatto Limitante:</strong> {{ idriche.manufatto_limitante|default:"-" }}</p>
                     </div>
 
-                    <div class="col-md-4">
-                        <h6 class="text-info fw-bold mb-3 border-bottom pb-2">AUTORIZZAZIONI</h6>
+                    <div class="col-lg-4 data-list">
+                        <div class="bg-light p-2 rounded mb-2"><h6 class="text-primary fw-bold mb-0">3. AUTORIZZAZIONI</h6></div>
+
                         <p><strong>Vasca PTUA:</strong> {{ idriche.vasca_ptua|default:"-" }}</p>
-                        <p><strong>Consorzio:</strong> {{ idriche.consorzio_competente|default:"-" }}</p>
+                        <div class="my-3 border-top"></div>
+                        
+                        <h6 class="text-muted small fw-bold">PROVINCIA</h6>
                         <p><strong>Atto Provincia n°:</strong> {{ idriche.atto_provincia_n|default:"-" }}</p>
-                        <p><strong>Scadenza Prov:</strong> {{ idriche.scadenza_autorizzazione|default:"-" }}</p>
+                        <p class="text-danger"><strong>Scadenza Autorizzazione:</strong> {{ idriche.scadenza_autorizzazione|default:"-" }}</p>
+                        
+                        <div class="my-3 border-top"></div>
+                        
+                        <h6 class="text-muted small fw-bold">CONSORZIO</h6>
+                        <p><strong>Ente Competente:</strong> {{ idriche.consorzio_competente|default:"-" }}</p>
                         <p><strong>Atto Consorzio n°:</strong> {{ idriche.atto_consorzio_n|default:"-" }}</p>
-                        <p><strong>Scadenza Cons:</strong> {{ idriche.scadenza_concessione|default:"-" }}</p>
+                        <p class="text-danger"><strong>Scadenza Concessione:</strong> {{ idriche.scadenza_concessione|default:"-" }}</p>
                     </div>
                 </div>
 
-                <div class="mt-4 p-3 bg-light rounded-4 border">
-                    <h6 class="fw-bold mb-2">Note Autorizzazioni / Concessioni:</h6>
-                    <p class="mb-0 text-dark">{{ idriche.note_autorizzazioni|linebreaks|default:"Nessuna nota presente." }}</p>
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div class="p-3 bg-light rounded-4 border">
+                            <h6 class="fw-bold mb-2"><i class="fas fa-sticky-note me-2 text-warning"></i>Note Autorizzazioni / Concessioni:</h6>
+                            <p class="mb-0 text-dark" style="white-space: pre-wrap;">{{ idriche.note_autorizzazioni|default:"Nessuna nota registrata." }}</p>
+                        </div>
+                    </div>
                 </div>
+
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Chiudi</button>
+                <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Chiudi Scheda</button>
             </div>
         </div>
     </div>
