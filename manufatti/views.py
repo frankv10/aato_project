@@ -62,19 +62,49 @@ def crea_manufatto(request):
     })
 
 
+@login_required
 def lista_manufatti(request):
     ente_utente = get_user_ente(request.user)
-    query = request.GET.get('query')
+    
+    # 1. Recupero parametri GET
+    query = request.GET.get('query', '')
+    comune_selezionato = request.GET.get('comune', '')
+    depuratore_selezionato = request.GET.get('depuratore', '')
+
+    # 2. Queryset base
+    manufatti = Manufatto.objects.all()
+
+    # 3. Applicazione Filtri
     if query:
-        manufatti = Manufatto.objects.filter(Q(nome__icontains=query) | Q(stato__icontains=query))
-    else:
-        manufatti = Manufatto.objects.all()
+        manufatti = manufatti.filter(Q(nome__icontains=query) | Q(stato__icontains=query))
+    
+    if comune_selezionato:
+        manufatti = manufatti.filter(comune=comune_selezionato)
+        
+    if depuratore_selezionato:
+        manufatti = manufatti.filter(depuratore_associato=depuratore_selezionato)
+
+    # 4. Recupero liste per i menu a tendina (Dropdown)
+    # Estraiamo solo valori unici, ordinati e non nulli/vuoti
+    lista_comuni = Manufatto.objects.values_list('comune', flat=True)\
+        .exclude(comune__isnull=True).exclude(comune__exact='')\
+        .distinct().order_by('comune')
+
+    lista_depuratori = Manufatto.objects.values_list('depuratore_associato', flat=True)\
+        .exclude(depuratore_associato__isnull=True).exclude(depuratore_associato__exact='')\
+        .distinct().order_by('depuratore_associato')
+
     return render(request, 'manufatti/lista_manufatti.html', {
         'manufatti': manufatti,
-        'query': query,
         'ente_utente': ente_utente,
+        # Passiamo i valori correnti per mantenerli selezionati nel form
+        'query': query,
+        'comune_selezionato': comune_selezionato,
+        'depuratore_selezionato': depuratore_selezionato,
+        # Passiamo le liste per popolare le <select>
+        'lista_comuni': lista_comuni,
+        'lista_depuratori': lista_depuratori,
     })
-
 
 def dettaglio_manufatto(request, manufatto_id):
     ente_utente = get_user_ente(request.user)

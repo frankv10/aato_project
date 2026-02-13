@@ -3,237 +3,210 @@
 {% block title %}Dettaglio {{ manufatto.nome }}{% endblock %}
 
 {% block content %}
-<div class="container detail-wrapper mb-5">
+<div class="container detail-wrapper mb-5 mt-4">
     
-    <div class="d-flex justify-content-between align-items-center mb-4 mt-2">
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
         <div>
-            <h2 class="text-primary mb-0">Dettaglio Manufatto: <strong>{{ manufatto.nome }}</strong></h2>
-            <small class="text-muted">Creato il: {{ manufatto.data_creazione|date:"d/m/Y" }}</small>
+            <h2 class="text-primary fw-bold mb-0">
+                <i class="fas fa-cube me-2"></i>{{ manufatto.nome }}
+            </h2>
+            <small class="text-muted text-uppercase fw-bold" style="letter-spacing: 1px;">
+                ID Manufatto: #{{ manufatto.id }} | Creato il {{ manufatto.data_creazione|date:"d/m/Y" }}
+            </small>
         </div>
-        <span class="badge bg-secondary p-2 fs-6 shadow-sm">{{ manufatto.stato }}</span>
+        <div class="text-end">
+            <span class="badge {% if manufatto.stato == 'COMPLETATO' %}bg-success{% elif manufatto.stato == 'IN CORSO' %}bg-warning text-dark{% else %}bg-info text-dark{% endif %} px-4 py-2 fs-6 shadow-sm rounded-pill">
+                {{ manufatto.stato }}
+            </span>
+        </div>
     </div>
 
-    <div class="row">
-        <div class="col-md-5">
-            <div class="card shadow-sm mb-3 border-0 rounded-4 h-100">
-                <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center rounded-top-4">
+    <div class="row g-4">
+        <div class="col-lg-4">
+            <div class="card shadow-sm border-0 rounded-4 h-100">
+                <div class="card-header bg-dark text-white rounded-top-4 py-3">
                     <h5 class="mb-0 small-caps"><i class="fas fa-map-marker-alt me-2"></i>Localizzazione</h5>
-                    {% if geografiche %}
-                        <button class="btn btn-sm btn-outline-light rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#geoModal">Mappa & Dati</button>
-                    {% endif %}
                 </div>
                 <div class="card-body">
-                    <p><strong>Comune:</strong> {{ manufatto.comune|default:"-" }}</p>
-                    <p><strong>Località:</strong> {{ manufatto.localita|default:"-" }}</p>
-                    <p><strong>Ubicazione:</strong> {{ manufatto.ubicazione|default:"-" }}</p>
-                    <hr>
-                    <div class="d-flex justify-content-between">
-                        <span><strong>Lat:</strong> {{ geografiche.latitudine|default:"-" }}</span>
-                        <span><strong>Lon:</strong> {{ geografiche.longitudine|default:"-" }}</span>
+                    <div class="data-list">
+                        <p><strong>Comune:</strong> <span>{{ manufatto.comune|default:"-" }}</span></p>
+                        <p><strong>Località:</strong> <span>{{ manufatto.localita|default:"-" }}</span></p>
+                        <p><strong>Ubicazione:</strong> <span>{{ manufatto.ubicazione|default:"-" }}</span></p>
+                        <div class="bg-light p-3 rounded-3 mt-3 border text-center">
+                            <h6 class="text-muted small fw-bold mb-2">COORDINATE GPS</h6>
+                            <div class="d-flex justify-content-around">
+                                <div><small class="d-block text-muted">Latitudine</small><strong>{{ geografiche.latitudine|default:"-" }}</strong></div>
+                                <div class="border-start"></div>
+                                <div><small class="d-block text-muted">Longitudine</small><strong>{{ geografiche.longitudine|default:"-" }}</strong></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="col-md-7">
-            <div class="card shadow-sm mb-3 border-0 rounded-4 h-100">
-                <div class="card-header bg-info text-dark d-flex justify-content-between align-items-center rounded-top-4">
-                    <h5 class="mb-0 small-caps"><i class="fas fa-water me-2"></i>Sintesi Tecnica</h5>
-                    {% if idriche %}
-                        <button class="btn btn-sm btn-outline-dark rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#idricheModal"> Scheda Tecnica Completa</button>
-                    {% endif %}
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0 rounded-4 h-100">
+                <div class="card-header bg-primary text-white rounded-top-4 py-3">
+                    <h5 class="mb-0 small-caps"><i class="fas fa-microchip me-2"></i>Dati Tecnici di Rete</h5>
                 </div>
                 <div class="card-body">
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <h6 class="text-muted text-uppercase small fw-bold">Rete Fognaria</h6>
-                            <p class="mb-1"><strong>Depuratore:</strong> {{ manufatto.depuratore_associato|default:"-" }}</p>
-                            <p class="mb-1"><strong>Emissario:</strong> {{ manufatto.recapito_emissario|default:"-" }}</p>
-                            <p class="mb-0"><strong>Tipologia:</strong> {{ manufatto.tipologia_sfioratore|default:"-" }}</p>
+                    <div class="row g-4">
+                        <div class="col-md-6 border-end">
+                            <h6 class="text-primary fw-bold text-uppercase mb-3 small">Infrastruttura</h6>
+                            <p class="mb-2"><strong>Depuratore:</strong><br>{{ manufatto.depuratore_associato|default:"-" }}</p>
+                            <p class="mb-2"><strong>Emissario:</strong><br>{{ manufatto.recapito_emissario|default:"-" }}</p>
+                            <p class="mb-0"><strong>Tipologia Sfioratore:</strong><br>{{ manufatto.tipologia_sfioratore|default:"-" }}</p>
                         </div>
-                        <div class="col-md-6 border-start">
-                            <h6 class="text-muted text-uppercase small fw-bold">Carico Principale</h6>
-                            <p class="mb-1"><strong>AE Totali:</strong> <span class="fw-bold">{{ idriche.ae_tot|default:"0" }}</span></p>
-                            <p class="mb-1"><strong>Qnm:</strong> {{ idriche.qnm|default:"0" }} l/s</p>
-                            <p class="mb-0"><strong>Conformità:</strong> 
-                                <span class="badge {% if idriche.e_conforme == 'SI' %}bg-success{% else %}bg-danger{% endif %} rounded-pill">
-                                    {{ idriche.e_conforme|default:"NON DEFINITO" }}
+                        <div class="col-md-6">
+                            <h6 class="text-primary fw-bold text-uppercase mb-3 small">Parametri Idrici</h6>
+                            <div class="d-flex justify-content-between border-bottom pb-1 mb-1">
+                                <span>AE Totali:</span><span class="fw-bold">{{ idriche.ae_tot|default:"0" }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between border-bottom pb-1 mb-1">
+                                <span>Qnm (l/s):</span><span class="fw-bold">{{ idriche.qnm|default:"0" }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between border-bottom pb-1 mb-1">
+                                <span>Qs (l/s):</span><span class="fw-bold">{{ idriche.qs|default:"0" }}</span>
+                            </div>
+                            <div class="mt-3">
+                                <span class="badge {% if idriche.e_conforme == 'SI' %}bg-success{% else %}bg-danger{% endif %} w-100 py-2 rounded-pill shadow-sm">
+                                    CONFORMITÀ: {{ idriche.e_conforme|default:"NON DEFINITA" }}
                                 </span>
-                            </p>
+                            </div>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12">
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-header bg-info text-dark rounded-top-4 py-3">
+                    <h5 class="mb-0 small-caps"><i class="fas fa-table me-2"></i>Analisi di Dettaglio e Autorizzazioni</h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row g-4">
+                        <div class="col-md-4 border-end">
+                            <h6 class="fw-bold text-muted border-bottom pb-2 mb-3">Dettaglio Carichi</h6>
+                            <div class="data-row"><span>AE Civili:</span><strong>{{ idriche.ae_civ|default:"-" }}</strong></div>
+                            <div class="data-row"><span>AE Industriali:</span><strong>{{ idriche.ae_ind|default:"-" }}</strong></div>
+                            <div class="data-row"><span>Q Civile (l/s):</span><strong>{{ idriche.q_civ|default:"-" }}</strong></div>
+                            <div class="data-row"><span>Q Industriale (l/s):</span><strong>{{ idriche.q_ind|default:"-" }}</strong></div>
+                        </div>
+                        <div class="col-md-4 border-end">
+                            <h6 class="fw-bold text-muted border-bottom pb-2 mb-3">Verifiche Funzionali</h6>
+                            <div class="data-row"><span>Rapporto Qs/Qnm:</span><strong>{{ idriche.qs_qnm_ratio|default:"-" }}</strong></div>
+                            <div class="data-row"><span>Qs > Pavv:</span><strong>{{ idriche.qs_gt_pavv|default:"-" }}</strong></div>
+                            <div class="data-row"><span>Vasca Reg. Regionale:</span><strong>{{ idriche.vasca_reg_regionale|default:"-" }}</strong></div>
+                            <div class="data-row"><span>Bacino (ha):</span><strong>{{ idriche.bacino_proprio_ha|default:"-" }}</strong></div>
+                        </div>
+                        <div class="col-md-4">
+                            <h6 class="fw-bold text-muted border-bottom pb-2 mb-3">Status Amministrativo</h6>
+                            <div class="data-row"><span>Atto Provincia:</span><strong>{{ idriche.atto_provincia_n|default:"-" }}</strong></div>
+                            <div class="data-row"><span>Scadenza Prov:</span><strong class="text-danger">{{ idriche.scadenza_autorizzazione|default:"-" }}</strong></div>
+                            <div class="data-row"><span>Consorzio:</span><strong>{{ idriche.consorzio_competente|default:"-" }}</strong></div>
+                            <div class="data-row"><span>Scadenza Cons:</span><strong class="text-danger">{{ idriche.scadenza_concessione|default:"-" }}</strong></div>
+                        </div>
+                    </div>
+                    
+                    {% if idriche.note_autorizzazioni %}
+                    <div class="mt-4 p-3 bg-light rounded-4 border-start border-warning border-4">
+                        <h6 class="fw-bold mb-1"><i class="fas fa-sticky-note me-2"></i>Note:</h6>
+                        <p class="mb-0 small text-dark">{{ idriche.note_autorizzazioni }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12">
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-header bg-secondary text-white rounded-top-4 py-3 d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 small-caps"><i class="fas fa-file-alt me-2"></i>Archivio Documentale</h5>
+                    <a href="{% url 'gestione_documenti' manufatto.id %}" class="btn btn-sm btn-light rounded-pill px-3 fw-bold">
+                        <i class="fas fa-plus-circle me-1"></i> Gestisci File
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if manufatto.documenti.all %}
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Titolo Documento</th>
+                                        <th>Data Caricamento</th>
+                                        <th class="text-end">Azioni</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for doc in manufatto.documenti.all %}
+                                    <tr>
+                                        <td class="fw-bold">{{ doc.titolo }}</td>
+                                        <td class="text-muted small">{{ doc.data_caricamento|date:"d/m/Y H:i" }}</td>
+                                        <td class="text-end">
+                                            <a href="{% url 'scarica_documento' doc.id %}" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                                                <i class="fas fa-download me-1"></i> Scarica
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-folder-open fa-3x text-muted mb-2"></i>
+                            <p class="text-muted mb-0">Nessun documento caricato per questo manufatto.</p>
+                        </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="d-flex justify-content-between align-items-center mt-5 mb-5">
-        <a href="{% url 'lista_manufatti' %}" class="btn btn-outline-secondary rounded-pill px-4 shadow-sm">
+    <div class="d-flex flex-wrap justify-content-between align-items-center mt-5 pt-4 border-top">
+        <a href="{% url 'lista_manufatti' %}" class="btn btn-outline-secondary rounded-pill px-4 shadow-sm mb-2 mb-md-0">
             <i class="fas fa-arrow-left me-2"></i>Torna alla Lista
         </a>
 
         <div class="d-flex gap-2">
             {% if ente_utente == 'TEA' or ente_utente == 'AATO' %}
                 <a href="{% url 'modifica_manufatto' manufatto.id %}" class="btn btn-warning rounded-pill px-4 shadow-sm fw-bold">
-                    <i class="fas fa-edit me-2"></i>Modifica
+                    <i class="fas fa-edit me-2"></i>Modifica Dati
                 </a>
             {% endif %}
-            <a href="{% url 'gestione_documenti' manufatto.id %}" class="btn btn-dark rounded-pill px-4 shadow-sm">
-                <i class="fas fa-file-alt me-2"></i>Documenti
+            <a href="{% if ente_utente == 'AATO' %}{% url 'aato' %}{% else %}{% url 'tea' %}{% endif %}" class="btn btn-outline-primary rounded-pill px-4 shadow-sm">
+                <i class="fas fa-home me-2"></i>Home
             </a>
         </div>
-
-        {% if ente_utente == 'AATO' %}
-            <a href="{% url 'aato' %}" class="btn btn-outline-primary rounded-pill px-4 shadow-sm">
-                <i class="fas fa-home me-2"></i>Home AATO
-            </a>
-        {% else %}
-            <a href="{% url 'tea' %}" class="btn btn-outline-primary rounded-pill px-4 shadow-sm">
-                <i class="fas fa-home me-2"></i>Home TEA
-            </a>
-        {% endif %}
     </div>
 </div>
 
 <style>
-    .detail-wrapper {
-        margin-top: 20px !important;
-        position: relative;
-        z-index: 10;
-    }
-    .modal-dialog {
-        display: flex;
-        align-items: center;
-        min-height: calc(100% - 3.5rem);
-        padding-top: 20px;
-        padding-bottom: 20px;
-    }
-    .modal-content {
-        border-radius: 25px !important;
-        overflow: hidden;
-    }
-    .card-header { font-weight: bold; }
+    .detail-wrapper { margin-top: 20px !important; }
     .small-caps { font-variant: small-caps; letter-spacing: 1px; }
-    .rounded-4 { border-radius: 20px !important; }
-    .rounded-top-4 { border-top-left-radius: 20px !important; border-top-right-radius: 20px !important; }
+    .rounded-4 { border-radius: 15px !important; }
+    .rounded-top-4 { border-top-left-radius: 15px !important; border-top-right-radius: 15px !important; }
     
-    /* Stili per le liste nel modal */
     .data-list p {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.75rem;
+        border-bottom: 1px dashed #eee;
+        padding-bottom: 0.25rem;
+    }
+    .data-list strong { color: #555; }
+    
+    .data-row {
+        display: flex;
+        justify-content: space-between;
         margin-bottom: 0.5rem;
-        border-bottom: 1px solid #f0f0f0;
-        padding-bottom: 0.2rem;
+        font-size: 0.9rem;
     }
-    .data-list strong {
-        color: #555;
-    }
+    .data-row span { color: #6c757d; }
+    .data-row strong { color: #333; }
+
+    .card-header h5 { font-size: 1.1rem; }
 </style>
-
-<div class="modal fade" id="geoModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg">
-            <div class="modal-header bg-dark text-white">
-                <h5 class="modal-title"><i class="fas fa-map-marked-alt me-2"></i>Dati Geografici Completi</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div class="row">
-                    <div class="col-md-6 border-end">
-                        <h6 class="text-muted text-uppercase small fw-bold">Riferimenti Amministrativi</h6>
-                        <p><strong>Comune:</strong> {{ manufatto.comune|default:"-" }}</p>
-                        <p><strong>Località:</strong> {{ manufatto.localita|default:"-" }}</p>
-                        <p><strong>Ubicazione:</strong> {{ manufatto.ubicazione|default:"-" }}</p>
-                    </div>
-                    <div class="col-md-6">
-                        <h6 class="text-muted text-uppercase small fw-bold">Coordinate GPS</h6>
-                        <div class="bg-light p-3 rounded-4 border text-center">
-                             <p class="mb-1 fs-5"><strong>Lat:</strong> {{ geografiche.latitudine|default:"-" }}</p>
-                             <p class="mb-0 fs-5"><strong>Lon:</strong> {{ geografiche.longitudine|default:"-" }}</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="modal fade" id="idricheModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
-        <div class="modal-content border-0 shadow-lg">
-            <div class="modal-header bg-info text-dark">
-                <h5 class="modal-title"><i class="fas fa-table me-2"></i>Scheda Tecnica e Amministrativa Completa</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body bg-white" style="font-size: 0.9rem;">
-                
-                <div class="row g-4">
-                    <div class="col-lg-4 border-end data-list">
-                        <div class="bg-light p-2 rounded mb-2"><h6 class="text-primary fw-bold mb-0">1. CARICHI E PORTATE</h6></div>
-                        
-                        <p><strong>AE Civili:</strong> {{ idriche.ae_civ|default:"-" }}</p>
-                        <p><strong>AE Industriali:</strong> {{ idriche.ae_ind|default:"-" }}</p>
-                        <p><strong>AE Totali:</strong> {{ idriche.ae_tot|default:"-" }}</p>
-                        <div class="my-3 border-top"></div>
-                        <p><strong>Q Civile (l/s):</strong> {{ idriche.q_civ|default:"-" }}</p>
-                        <p><strong>Q Industriale (l/s):</strong> {{ idriche.q_ind|default:"-" }}</p>
-                        <p><strong>Q Nera Media (Qnm):</strong> {{ idriche.qnm|default:"-" }}</p>
-                        <p><strong>Q Soglia (Qs):</strong> {{ idriche.qs|default:"-" }}</p>
-                        <p><strong>P avviamento (Pavv):</strong> {{ idriche.pavv|default:"-" }}</p>
-                        <div class="my-3 border-top"></div>
-                        <p><strong>Q Meteo Ingresso:</strong> {{ idriche.q_meteo_ingresso_ls|default:"-" }}</p>
-                        <p><strong>Q Limite Ingresso:</strong> {{ idriche.q_limite_ingresso_ls|default:"-" }}</p>
-                    </div>
-
-                    <div class="col-lg-4 border-end data-list">
-                        <div class="bg-light p-2 rounded mb-2"><h6 class="text-primary fw-bold mb-0">2. DIMENSIONAMENTO & VERIFICHE</h6></div>
-
-                        <p><strong>Rapporto Qs/Qnm:</strong> {{ idriche.qs_qnm_ratio|default:"-" }}</p>
-                        <p><strong>Verifica Qs > Pavv:</strong> {{ idriche.qs_gt_pavv|default:"-" }}</p>
-                        <p><strong>Rapporto Qs/Pavv:</strong> {{ idriche.qs_pavv_ratio|default:"-" }}</p>
-                        <div class="my-3 border-top"></div>
-                        <p><strong>Tipologia RR6:</strong> {{ idriche.tipologia_sfioro_rr6|default:"-" }}</p>
-                        <p><strong>Stato Conformità:</strong> <span class="fw-bold">{{ idriche.e_conforme|default:"-" }}</span></p>
-                        <div class="my-3 border-top"></div>
-                        <p><strong>Vasca Reg. Regionale:</strong> {{ idriche.vasca_reg_regionale|default:"-" }}</p>
-                        <p><strong>Bacino Proprio (ha):</strong> {{ idriche.bacino_proprio_ha|default:"-" }}</p>
-                        <p><strong>Ettari Impermeabili (ha imp):</strong> {{ idriche.ha_imp|default:"-" }}</p>
-                        <p><strong>Portata Specifica Scarico:</strong> {{ idriche.portata_specifica_scarico|default:"-" }}</p>
-                        <p><strong>Q Scolmata (l/s):</strong> {{ idriche.qscolmata_ls|default:"-" }}</p>
-                        <p><strong>Manufatto Limitante:</strong> {{ idriche.manufatto_limitante|default:"-" }}</p>
-                    </div>
-
-                    <div class="col-lg-4 data-list">
-                        <div class="bg-light p-2 rounded mb-2"><h6 class="text-primary fw-bold mb-0">3. AUTORIZZAZIONI</h6></div>
-
-                        <p><strong>Vasca PTUA:</strong> {{ idriche.vasca_ptua|default:"-" }}</p>
-                        <div class="my-3 border-top"></div>
-                        
-                        <h6 class="text-muted small fw-bold">PROVINCIA</h6>
-                        <p><strong>Atto Provincia n°:</strong> {{ idriche.atto_provincia_n|default:"-" }}</p>
-                        <p class="text-danger"><strong>Scadenza Autorizzazione:</strong> {{ idriche.scadenza_autorizzazione|default:"-" }}</p>
-                        
-                        <div class="my-3 border-top"></div>
-                        
-                        <h6 class="text-muted small fw-bold">CONSORZIO</h6>
-                        <p><strong>Ente Competente:</strong> {{ idriche.consorzio_competente|default:"-" }}</p>
-                        <p><strong>Atto Consorzio n°:</strong> {{ idriche.atto_consorzio_n|default:"-" }}</p>
-                        <p class="text-danger"><strong>Scadenza Concessione:</strong> {{ idriche.scadenza_concessione|default:"-" }}</p>
-                    </div>
-                </div>
-
-                <div class="row mt-4">
-                    <div class="col-12">
-                        <div class="p-3 bg-light rounded-4 border">
-                            <h6 class="fw-bold mb-2"><i class="fas fa-sticky-note me-2 text-warning"></i>Note Autorizzazioni / Concessioni:</h6>
-                            <p class="mb-0 text-dark" style="white-space: pre-wrap;">{{ idriche.note_autorizzazioni|default:"Nessuna nota registrata." }}</p>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Chiudi Scheda</button>
-            </div>
-        </div>
-    </div>
-</div>
 {% endblock %}
