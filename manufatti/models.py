@@ -3,12 +3,16 @@ from django.db import models
 
 
 class Manufatto(models.Model):
-    nome = models.CharField(max_length=100)  # Corrisponde a 'Codice' nel CSV
-    stato = models.CharField(max_length=50, choices=[
-        ('PROGRAMMATO', 'PROGRAMMATO'),
-        ('IN CORSO', 'IN CORSO',),
-        ('COMPLETATO', 'COMPLETATO')
-    ])
+    nome = models.CharField(max_length=100) 
+    stato = models.CharField(
+        max_length=50, 
+        choices=[
+            ('PROGRAMMATO', 'PROGRAMMATO'),
+            ('IN ESECUZIONE', 'IN ESECUZIONE'),
+            ('COMPLETATO', 'COMPLETATO') # Aggiunto per coerenza con i badge visti prima
+        ],
+        default='IN ESECUZIONE'  # <--- IMPOSTA IL DEFAULT QUI
+    )
     data_creazione = models.DateTimeField(auto_now_add=True)
 
     # Dati anagrafici principali (spostati da info_geografiche per coerenza)
