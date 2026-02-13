@@ -62,7 +62,6 @@ def crea_manufatto(request):
     })
 
 
-@login_required
 def lista_manufatti(request):
     ente_utente = get_user_ente(request.user)
     
@@ -309,20 +308,35 @@ def scarica_documento(request, doc_id):
 @login_required
 def ricerca_interventi(request):
     ente_utente = get_user_ente(request.user)
+    
+    # Recupero parametri dalla URL (GET)
     query = request.GET.get('q', '')
     stato = request.GET.get('stato', '')
-    data = request.GET.get('data', '')
-    risultati = Manufatto.objects.all()
+    comune_sel = request.GET.get('comune', '')
+
+    # Queryset base
+    risultati = Manufatto.objects.all().order_by('-data_creazione')
+
+    # Applicazione filtri
     if query:
         risultati = risultati.filter(nome__icontains=query)
+    
     if stato:
         risultati = risultati.filter(stato=stato)
-    if data:
-        risultati = risultati.filter(data_creazione__date=data)
+        
+    if comune_sel:
+        risultati = risultati.filter(comune=comune_sel)
+
+    # Lista unica dei comuni per il dropdown
+    lista_comuni = Manufatto.objects.values_list('comune', flat=True)\
+        .exclude(comune__isnull=True).exclude(comune__exact='')\
+        .distinct().order_by('comune')
+
     context = {
         'query': query,
         'stato': stato,
-        'data': data,
+        'comune_selezionato': comune_sel,
+        'lista_comuni': lista_comuni,
         'risultati': risultati,
         'ente_utente': ente_utente,
     }
@@ -440,15 +454,16 @@ def import_manufatti(request):
 
                 # A. Creazione Manufatto
                 manufatto = Manufatto.objects.create(
-                    nome=nome,
-                    stato=stato_definitivo,
-                    comune=row.get('comune'),
-                    localita=row.get('localita') or row.get('località'),
-                    ubicazione=row.get('ubicazione'),
-                    depuratore_associato=row.get('depuratore associato') or row.get('depuratore'),
-                    recapito_emissario=row.get('recapito emissario') or row.get('emissario'),
-                    tipologia_sfioratore=row.get('tipo') or row.get('tipologia')
-                )
+                nome=nome,
+                # Se 'stato' è vuoto nel file Excel, usa 'IN ESECUZIONE'
+                stato=row.get('stato') if row.get('stato') else 'IN ESECUZIONE',
+                comune=row.get('comune'),
+                localita=row.get('localita') or row.get('località'),
+                ubicazione=row.get('ubicazione'),
+                depuratore_associato=row.get('depuratore associato') or row.get('depuratore'),
+                recapito_emissario=row.get('recapito emissario') or row.get('emissario'),
+                tipologia_sfioratore=row.get('tipo') or row.get('tipologia')
+)
                 count += 1
 
                 # B. Gestione Coordinate

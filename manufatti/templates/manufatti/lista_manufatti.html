@@ -2,156 +2,121 @@
 
 {% block content %}
 <div class="container mt-4 pb-5">
-
-  <div class="row align-items-center mb-3">
-    <div class="col-md-5">
-      <h4 class="fw-bold text-primary mb-0">
-        <i class="fas fa-layer-group me-2"></i>Gestione Manufatti
-      </h4>
-      <small class="text-muted">Totale: {{ manufatti.count }} elementi</small>
-    </div>
-    
-    <div class="col-md-7 text-md-end mt-2 mt-md-0">
-      {% if ente_utente == 'TEA' or ente_utente == 'AATO' %}
-        <div class="d-flex justify-content-md-end gap-2 flex-wrap">
-            <a href="{% url 'export_manufatti' %}" class="btn btn-sm btn-outline-success rounded-pill px-3 fw-bold">
-                <i class="fas fa-file-excel me-1"></i> Scarica Excel
-            </a>
-            <a href="{% url 'import_manufatti' %}" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-bold">
-                <i class="fas fa-upload me-1"></i> Importa
-            </a>
-            <a href="{% url 'crea_manufatto' %}" class="btn btn-sm btn-primary rounded-pill px-3 shadow-sm fw-bold">
-                <i class="fas fa-plus me-1"></i> Nuovo
-            </a>
+    <div class="row align-items-center mb-4">
+        <div class="col-md-6">
+            <h3 class="fw-bold text-primary mb-0"><i class="fas fa-list-ul me-2"></i>Elenco Sfioratori</h3>
         </div>
-      {% endif %}
+        <div class="col-md-6 text-md-end mt-2">
+            {% if ente_utente == 'TEA' or ente_utente == 'AATO' %}
+                <div class="d-flex justify-content-md-end gap-2 flex-wrap">
+                    <a href="{% url 'export_manufatti' %}" class="btn btn-sm btn-outline-success rounded-pill px-3 me-2 fw-bold border-2">
+                        <i class="fas fa-file-excel me-1"></i> Scarica Excel
+                    </a>
+                    <a href="{% url 'import_manufatti' %}" class="btn btn-sm btn-outline-primary rounded-pill px-3 me-2 fw-bold border-2">
+                        <i class="fas fa-upload me-1"></i> Importa
+                    </a>
+                    <a href="{% url 'crea_manufatto' %}" class="btn btn-sm btn-primary rounded-pill px-4 shadow-sm fw-bold">
+                        <i class="fas fa-plus me-1"></i> Nuovo
+                    </a>
+                </div>
+            {% endif %}
+        </div>
     </div>
-  </div>
 
-  <div class="card border-0 shadow-sm mb-4 bg-light" style="border-radius: 12px;">
-      <div class="card-body p-2">
-        <form method="GET" action="{% url 'lista_manufatti' %}">
-            <div class="row g-2 align-items-center">
-                <div class="col-md-4">
-                    <div class="input-group input-group-sm">
-                        <span class="input-group-text bg-white border-end-0 rounded-start-pill"><i class="fas fa-search text-muted"></i></span>
-                        <input type="text" name="query" class="form-control border-start-0 rounded-end-pill" placeholder="Cerca..." value="{{ query }}">
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <select name="comune" class="form-select form-select-sm rounded-pill">
-                        <option value="">📍 Tutti i Comuni</option>
-                        {% for c in lista_comuni %}
-                            <option value="{{ c }}" {% if c == comune_selezionato %}selected{% endif %}>{{ c }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <select name="depuratore" class="form-select form-select-sm rounded-pill">
-                        <option value="">💧 Tutti i Depuratori</option>
-                        {% for d in lista_depuratori %}
-                            <option value="{{ d }}" {% if d == depuratore_selezionato %}selected{% endif %}>{{ d }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="col-md-2 d-flex gap-1">
-                    <button class="btn btn-sm btn-dark rounded-pill px-3 w-100" type="submit">Filtra</button>
-                    {% if query or comune_selezionato or depuratore_selezionato %}
-                        <a href="{% url 'lista_manufatti' %}" class="btn btn-sm btn-outline-danger rounded-circle" title="Reset">
-                            <i class="fas fa-times"></i>
-                        </a>
-                    {% endif %}
-                </div>
-            </div>
-        </form>
-      </div>
-  </div>
-
-  {% if manufatti %}
-  <div class="row">
-    {% for m in manufatti %}
-    <div class="col-12 mb-2">
-        <div class="card border-0 shadow-sm hover-shadow transition-all" 
-             style="border-radius: 10px; border-left: 4px solid {% if m.stato == 'COMPLETATO' %}#198754{% elif m.stato == 'IN CORSO' %}#ffc107{% else %}#0dcaf0{% endif %};">
-            <div class="card-body p-2 px-3">
-                <div class="row align-items-center">
-                    
+    <div class="card border-0 shadow-sm mb-4 bg-light rounded-4">
+        <div class="card-body p-2 px-3">
+            <form method="GET" action="{% url 'lista_manufatti' %}">
+                <div class="row g-2 align-items-center">
                     <div class="col-md-4">
-                        <div class="d-flex align-items-center">
-                            <h6 class="mb-0 fw-bold me-2">
-                                <a href="{% url 'dettaglio_manufatto' m.id %}" class="text-decoration-none text-dark">
-                                    {{ m.nome }}
-                                </a>
-                            </h6>
-                            <span class="badge {% if m.stato == 'COMPLETATO' %}bg-success{% elif m.stato == 'IN CORSO' %}bg-warning text-dark{% else %}bg-secondary{% endif %} rounded-pill" style="font-size: 0.65rem;">
-                                {{ m.stato }}
-                            </span>
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text bg-white border-end-0 rounded-start-pill"><i class="fas fa-search text-muted"></i></span>
+                            <input type="text" name="query" class="form-control border-start-0 rounded-end-pill" placeholder="Cerca..." value="{{ query }}">
                         </div>
                     </div>
+                    <div class="col-md-3">
+                        <select name="comune" class="form-select form-select-sm rounded-pill">
+                            <option value="">📍 Tutti i Comuni</option>
+                            {% for c in lista_comuni %}
+                                <option value="{{ c }}" {% if c == comune_selezionato %}selected{% endif %}>{{ c }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <select name="depuratore" class="form-select form-select-sm rounded-pill">
+                            <option value="">💧 Tutti i Depuratori</option>
+                            {% for d in lista_depuratori %}
+                                <option value="{{ d }}" {% if d == depuratore_selezionato %}selected{% endif %}>{{ d }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2 d-flex gap-1">
+                        <button class="btn btn-sm btn-dark rounded-pill px-3 w-100" type="submit">Filtra</button>
+                        {% if query or comune_selezionato or depuratore_selezionato %}
+                            <a href="{% url 'lista_manufatti' %}" class="btn btn-sm btn-outline-danger rounded-circle"><i class="fas fa-times"></i></a>
+                        {% endif %}
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
 
-                    <div class="col-md-5 mt-1 mt-md-0 border-start-md ps-md-4">
-                        <div class="d-flex align-items-center small text-muted">
+    {% if manufatti %}
+    <div class="row">
+        {% for m in manufatti %}
+        <div class="col-12 mb-2">
+            <div class="card border-0 shadow-sm hover-shadow transition-all" 
+                 style="border-radius: 10px; border-left: 5px solid {% if m.stato == 'COMPLETATO' or m.stato == 'IN ESECUZIONE' %}#198754{% else %}#0dcaf0{% endif %};">
+                <div class="card-body p-2 px-3">
+                    <div class="row align-items-center">
+                        <div class="col-md-4">
+                            <div class="d-flex align-items-center">
+                                <h6 class="mb-0 fw-bold me-2">
+                                    <a href="{% url 'dettaglio_manufatto' m.id %}" class="text-decoration-none text-dark">
+                                        {{ m.nome }}
+                                    </a>
+                                </h6>
+                                <span class="badge {% if m.stato == 'COMPLETATO' or m.stato == 'IN ESECUZIONE' %}bg-success{% else %}bg-info text-dark{% endif %} rounded-pill" style="font-size: 0.65rem;">
+                                    {{ m.stato }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="col-md-5 mt-1 mt-md-0 border-start-md ps-md-4 text-muted small">
                             <span class="me-3 text-truncate"><i class="fas fa-map-marker-alt text-danger me-1"></i>{{ m.comune|default:"-" }}</span>
                             <span class="text-truncate"><i class="fas fa-tint text-primary me-1"></i>{{ m.depuratore_associato|default:"-" }}</span>
                         </div>
-                    </div>
 
-                    <div class="col-md-3 text-md-end mt-2 mt-md-0">
-                        <div class="d-flex justify-content-md-end gap-2">
-                            <a href="{% url 'dettaglio_manufatto' m.id %}" class="btn btn-sm btn-light border rounded-circle action-icon text-primary" title="Vedi Dettaglio">
-                                <i class="fas fa-eye"></i>
-                            </a>
-                            
-                            <a href="{% url 'gestione_documenti' m.id %}" class="btn btn-sm btn-light border rounded-circle action-icon text-dark" title="Documenti">
-                                <i class="fas fa-file-alt"></i>
-                            </a>
-
-                            {% if ente_utente == 'TEA' or ente_utente == 'AATO' %}
-                                <a href="{% url 'modifica_manufatto' m.id %}" class="btn btn-sm btn-light border rounded-circle action-icon text-warning" title="Modifica">
-                                    <i class="fas fa-pen"></i>
-                                </a>
-                                <a href="{% url 'elimina_manufatto' m.id %}" class="btn btn-sm btn-light border rounded-circle action-icon text-danger" title="Elimina" onclick="return confirm('Eliminare {{ m.nome }}?');">
-                                    <i class="fas fa-trash"></i>
-                                </a>
-                            {% endif %}
+                        <div class="col-md-3 text-md-end mt-2 mt-md-0">
+                            <div class="d-flex justify-content-md-end gap-2">
+                                <a href="{% url 'dettaglio_manufatto' m.id %}" class="btn btn-sm btn-light border rounded-circle action-icon text-primary" title="Dettagli"><i class="fas fa-eye"></i></a>
+                                <a href="{% url 'gestione_documenti' m.id %}" class="btn btn-sm btn-light border rounded-circle action-icon text-dark" title="Documenti"><i class="fas fa-file-alt"></i></a>
+                                {% if ente_utente == 'TEA' or ente_utente == 'AATO' %}
+                                    <a href="{% url 'modifica_manufatto' m.id %}" class="btn btn-sm btn-light border rounded-circle action-icon text-warning" title="Modifica"><i class="fas fa-pen"></i></a>
+                                    <a href="{% url 'elimina_manufatto' m.id %}" class="btn btn-sm btn-light border rounded-circle action-icon text-danger" title="Elimina" onclick="return confirm('Eliminare {{ m.nome }}?');"><i class="fas fa-trash"></i></a>
+                                {% endif %}
+                            </div>
                         </div>
                     </div>
-
                 </div>
             </div>
         </div>
+        {% endfor %}
     </div>
-    {% endfor %}
-  </div>
-  {% else %}
-  <div class="text-center py-5">
-      <p class="text-muted">Nessun manufatto trovato.</p>
-  </div>
-  {% endif %}
+    {% else %}
+    <div class="text-center py-5"><p class="text-muted">Nessun manufatto trovato.</p></div>
+    {% endif %}
 
-  <div class="mt-4 border-top pt-3 text-center">
-    <a href="{% if ente_utente == 'AATO' %}{% url 'aato' %}{% else %}{% url 'tea' %}{% endif %}" class="btn btn-link btn-sm text-decoration-none text-secondary">
-        <i class="fas fa-home me-1"></i>Torna alla Home
-    </a>
-  </div>
+    <div class="mt-4 border-top pt-3 text-center">
+        <a href="{% if ente_utente == 'AATO' %}{% url 'aato' %}{% else %}{% url 'tea' %}{% endif %}" class="btn btn-link btn-sm text-decoration-none text-secondary">
+            <i class="fas fa-home me-1"></i>Torna alla Home
+        </a>
+    </div>
 </div>
 
 <style>
-    .hover-shadow:hover { transform: translateY(-2px); box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.08)!important; }
-    .transition-all { transition: all 0.2s ease-in-out; }
-    
-    /* Icone azioni più grandi e centrate */
-    .action-icon {
-        width: 36px;
-        height: 36px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.1rem; /* Icona interna più grande */
-    }
-
-    @media (min-width: 768px) {
-        .border-start-md { border-left: 1px solid #dee2e6; }
-    }
+    .hover-shadow:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.12)!important; }
+    .transition-all { transition: all 0.2s; }
+    .action-icon { width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center; }
+    @media (min-width: 768px) { .border-start-md { border-left: 1px solid #dee2e6; } }
 </style>
 {% endblock %}

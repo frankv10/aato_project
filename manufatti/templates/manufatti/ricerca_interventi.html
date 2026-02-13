@@ -1,80 +1,66 @@
 {% extends "accounts/base.html" %}
-{% load static %}
 
 {% block content %}
-<div class="container mt-5">
-    <div class="main-box">
-        <h2 class="text-primary mb-4">🔎 Ricerca Interventi</h2>
+<div class="container mt-4 pb-5">
+  <h3 class="fw-bold text-primary mb-4"><i class="fas fa-search-location me-2"></i>Ricerca Interventi</h3>
 
-        <form method="get" class="mb-4">
-            <div class="mb-3">
-                <label for="q" class="form-label">Nome del manufatto</label>
-                <input type="text" name="q" id="q" class="form-control" placeholder="Es. Serbatoio Nord" value="{{ query }}">
-            </div>
-
-            <div class="mb-3">
-                <label for="stato" class="form-label">Stato</label>
-                <select name="stato" id="stato" class="form-select">
-                    <option value="">-- Tutti gli stati --</option>
-                    <option value="PROGRAMMATO" {% if stato == "PROGRAMMATO" %}selected{% endif %}>PROGRAMMATO</option>
-                    <option value="IN CORSO" {% if stato == "IN CORSO" %}selected{% endif %}>IN CORSO</option>
-                    <option value="COMPLETATO" {% if stato == "COMPLETATO" %}selected{% endif %}>COMPLETATO</option>
-                </select>
-            </div>
-
-            <div class="mb-3">
-                <label for="data" class="form-label">Data di creazione</label>
-                <input type="date" name="data" id="data" class="form-control" value="{{ data }}">
-            </div>
-
-            <button type="submit" class="btn btn-primary w-100">🔍 Cerca</button>
-        </form>
-
-        {% if risultati %}
-            <div class="list-group mt-4">
-                {% for m in risultati %}
-                    <a href="{% url 'dettaglio_manufatto' m.id %}" class="list-group-item list-group-item-action">
-                        <div class="d-flex justify-content-between">
-                            <strong>{{ m.nome }}</strong>
-                            <span class="text-muted small">{{ m.stato }} | {{ m.data_creazione|date:"Y-m-d H:i" }}</span>
-                        </div>
-                    </a>
-                {% endfor %}
-            </div>
-        {% else %}
-            <div class="alert alert-warning mt-4">Nessun risultato trovato con i criteri inseriti.</div>
-        {% endif %}
-
-        {% comment %}
-          NUOVO BLOCCO PIÙ AFFIDABILE: Utilizza la variabile passata dalla vista,
-          che identifica l'ente loggato, ignorando i parametri GET persi.
-        {% endcomment %}
-        {% if ente_utente == 'AATO' %}
-            <a href="{% url 'aato' %}" class="btn btn-outline-secondary rounded-pill mt-4">⬅ Torna alla home AATO</a>
-        {% else %}
-            <a href="{% url 'tea' %}" class="btn btn-outline-secondary rounded-pill mt-4">⬅ Torna alla home TEA</a>
-        {% endif %}
+  <div class="card border-0 shadow-sm mb-4 bg-light rounded-4">
+    <div class="card-body p-3">
+      <form method="get">
+        <div class="row g-2 align-items-end">
+          <div class="col-md-4">
+            <label class="small fw-bold text-muted ps-2">Nome</label>
+            <input type="text" name="q" class="form-control form-control-sm rounded-pill" value="{{ query }}">
+          </div>
+          <div class="col-md-3">
+            <label class="small fw-bold text-muted ps-2">Comune</label>
+            <select name="comune" class="form-select form-select-sm rounded-pill">
+              <option value="">📍 Tutti i Comuni</option>
+              {% for c in lista_comuni %}
+                <option value="{{ c }}" {% if c == comune_selezionato %}selected{% endif %}>{{ c }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-3">
+            <label class="small fw-bold text-muted ps-2">Stato</label>
+            <select name="stato" class="form-select form-select-sm rounded-pill">
+              <option value="">Tutti gli stati</option>
+              <option value="PROGRAMMATO" {% if stato == "PROGRAMMATO" %}selected{% endif %}>PROGRAMMATO</option>
+              <option value="IN ESECUZIONE" {% if stato == "IN ESECUZIONE" %}selected{% endif %}>IN ESECUZIONE</option>
+            </select>
+          </div>
+          <div class="col-md-2">
+            <button type="submit" class="btn btn-sm btn-dark rounded-pill w-100 fw-bold">Cerca</button>
+          </div>
+        </div>
+      </form>
     </div>
+  </div>
+
+  <div class="row">
+    {% for m in risultati %}
+    <div class="col-12 mb-2">
+      <div class="card border-0 shadow-sm hover-shadow transition-all" 
+           style="border-radius: 10px; border-left: 5px solid {% if m.stato == 'IN ESECUZIONE' %}#198754{% else %}#0dcaf0{% endif %};">
+        <div class="card-body p-2 px-3">
+          <div class="row align-items-center">
+            <div class="col-md-6">
+              <div class="d-flex align-items-center">
+                <h6 class="mb-0 fw-bold me-2"><a href="{% url 'dettaglio_manufatto' m.id %}" class="text-dark text-decoration-none">{{ m.nome }}</a></h6>
+                <span class="badge {% if m.stato == 'IN ESECUZIONE' %}bg-success{% else %}bg-info text-dark{% endif %} rounded-pill" style="font-size: 0.65rem;">
+                  {{ m.stato }}
+                </span>
+              </div>
+            </div>
+            <div class="col-md-4 small text-muted"><i class="fas fa-map-marker-alt text-danger me-1"></i> {{ m.comune|default:"-" }}</div>
+            <div class="col-md-2 text-end">
+              <a href="{% url 'dettaglio_manufatto' m.id %}" class="btn btn-sm btn-light border rounded-circle action-icon text-primary"><i class="fas fa-eye"></i></a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
 </div>
-
-<style>
-    .main-box {
-        background: white;
-        border-radius: 12px;
-        padding: 30px;
-        box-shadow: 0 0 15px rgba(0, 0, 0, 0.08);
-        animation: slideInDown 0.5s ease-out;
-    }
-
-    @keyframes slideInDown {
-        from {
-            opacity: 0;
-            transform: translateY(-20px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-</style>
 {% endblock %}

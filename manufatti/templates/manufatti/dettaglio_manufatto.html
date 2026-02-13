@@ -1,77 +1,53 @@
 {% extends "accounts/base.html" %}
 
-{% block title %}Dettaglio {{ manufatto.nome }}{% endblock %}
-
 {% block content %}
-<div class="container detail-wrapper mb-5 mt-4">
-    
-    <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
+<div class="container mt-4 pb-5">
+    <div class="d-flex justify-content-between align-items-end mb-4 border-bottom pb-3">
         <div>
-            <h2 class="text-primary fw-bold mb-0">
-                <i class="fas fa-cube me-2"></i>{{ manufatto.nome }}
-            </h2>
-            <small class="text-muted text-uppercase fw-bold" style="letter-spacing: 1px;">
-                ID Manufatto: #{{ manufatto.id }} | Creato il {{ manufatto.data_creazione|date:"d/m/Y" }}
-            </small>
+            <h2 class="text-primary fw-bold mb-0">{{ manufatto.nome }}</h2>
+            <span class="text-muted small">Creato il {{ manufatto.data_creazione|date:"d/m/Y" }}</span>
         </div>
-        <div class="text-end">
-            <span class="badge {% if manufatto.stato == 'COMPLETATO' %}bg-success{% elif manufatto.stato == 'IN CORSO' %}bg-warning text-dark{% else %}bg-info text-dark{% endif %} px-4 py-2 fs-6 shadow-sm rounded-pill">
-                {{ manufatto.stato }}
-            </span>
-        </div>
+        <span class="badge {% if manufatto.stato == 'COMPLETATO' or manufatto.stato == 'IN ESECUZIONE' %}bg-success{% else %}bg-info text-dark{% endif %} rounded-pill px-4 py-2 fs-6 shadow-sm">
+            {{ manufatto.stato }}
+        </span>
     </div>
 
     <div class="row g-4">
-        <div class="col-lg-4">
-            <div class="card shadow-sm border-0 rounded-4 h-100">
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 rounded-4">
                 <div class="card-header bg-dark text-white rounded-top-4 py-3">
-                    <h5 class="mb-0 small-caps"><i class="fas fa-map-marker-alt me-2"></i>Localizzazione</h5>
+                    <h5 class="mb-0 fw-bold small-caps"><i class="fas fa-map-pin me-2"></i>Localizzazione</h5>
                 </div>
                 <div class="card-body">
-                    <div class="data-list">
-                        <p><strong>Comune:</strong> <span>{{ manufatto.comune|default:"-" }}</span></p>
-                        <p><strong>Località:</strong> <span>{{ manufatto.localita|default:"-" }}</span></p>
-                        <p><strong>Ubicazione:</strong> <span>{{ manufatto.ubicazione|default:"-" }}</span></p>
-                        <div class="bg-light p-3 rounded-3 mt-3 border text-center">
-                            <h6 class="text-muted small fw-bold mb-2">COORDINATE GPS</h6>
-                            <div class="d-flex justify-content-around">
-                                <div><small class="d-block text-muted">Latitudine</small><strong>{{ geografiche.latitudine|default:"-" }}</strong></div>
-                                <div class="border-start"></div>
-                                <div><small class="d-block text-muted">Longitudine</small><strong>{{ geografiche.longitudine|default:"-" }}</strong></div>
-                            </div>
-                        </div>
+                    <p class="mb-2"><strong>Comune:</strong> {{ manufatto.comune|default:"-" }}</p>
+                    <p class="mb-2"><strong>Località:</strong> {{ manufatto.localita|default:"-" }}</p>
+                    <p class="mb-3"><strong>Ubicazione:</strong> {{ manufatto.ubicazione|default:"-" }}</p>
+                    <div class="bg-light p-2 rounded text-center small border">
+                        <span class="d-block text-muted">Coordinate</span>
+                        <strong>{{ geografiche.latitudine|default:"-" }} , {{ geografiche.longitudine|default:"-" }}</strong>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="col-lg-8">
-            <div class="card shadow-sm border-0 rounded-4 h-100">
+        <div class="col-md-8">
+            <div class="card shadow-sm border-0 rounded-4">
                 <div class="card-header bg-primary text-white rounded-top-4 py-3">
-                    <h5 class="mb-0 small-caps"><i class="fas fa-microchip me-2"></i>Dati Tecnici di Rete</h5>
+                    <h5 class="mb-0 fw-bold small-caps"><i class="fas fa-info-circle me-2"></i>Sintesi Tecnica</h5>
                 </div>
                 <div class="card-body">
-                    <div class="row g-4">
+                    <div class="row">
                         <div class="col-md-6 border-end">
-                            <h6 class="text-primary fw-bold text-uppercase mb-3 small">Infrastruttura</h6>
-                            <p class="mb-2"><strong>Depuratore:</strong><br>{{ manufatto.depuratore_associato|default:"-" }}</p>
-                            <p class="mb-2"><strong>Emissario:</strong><br>{{ manufatto.recapito_emissario|default:"-" }}</p>
-                            <p class="mb-0"><strong>Tipologia Sfioratore:</strong><br>{{ manufatto.tipologia_sfioratore|default:"-" }}</p>
+                            <p><strong>Depuratore:</strong> {{ manufatto.depuratore_associato|default:"-" }}</p>
+                            <p><strong>Emissario:</strong> {{ manufatto.recapito_emissario|default:"-" }}</p>
+                            <p><strong>Tipologia:</strong> {{ manufatto.tipologia_sfioratore|default:"-" }}</p>
                         </div>
                         <div class="col-md-6">
-                            <h6 class="text-primary fw-bold text-uppercase mb-3 small">Parametri Idrici</h6>
-                            <div class="d-flex justify-content-between border-bottom pb-1 mb-1">
-                                <span>AE Totali:</span><span class="fw-bold">{{ idriche.ae_tot|default:"0" }}</span>
-                            </div>
-                            <div class="d-flex justify-content-between border-bottom pb-1 mb-1">
-                                <span>Qnm (l/s):</span><span class="fw-bold">{{ idriche.qnm|default:"0" }}</span>
-                            </div>
-                            <div class="d-flex justify-content-between border-bottom pb-1 mb-1">
-                                <span>Qs (l/s):</span><span class="fw-bold">{{ idriche.qs|default:"0" }}</span>
-                            </div>
+                            <div class="d-flex justify-content-between"><span>AE Totali:</span><strong>{{ idriche.ae_tot|default:"0" }}</strong></div>
+                            <div class="d-flex justify-content-between"><span>Qnm (l/s):</span><strong>{{ idriche.qnm|default:"0" }}</strong></div>
                             <div class="mt-3">
                                 <span class="badge {% if idriche.e_conforme == 'SI' %}bg-success{% else %}bg-danger{% endif %} w-100 py-2 rounded-pill shadow-sm">
-                                    CONFORMITÀ: {{ idriche.e_conforme|default:"NON DEFINITA" }}
+                                    CONFORMITÀ: {{ idriche.e_conforme|default:"N.D." }}
                                 </span>
                             </div>
                         </div>
@@ -83,36 +59,28 @@
         <div class="col-12">
             <div class="card shadow-sm border-0 rounded-4">
                 <div class="card-header bg-info text-dark rounded-top-4 py-3">
-                    <h5 class="mb-0 small-caps"><i class="fas fa-table me-2"></i>Analisi di Dettaglio e Autorizzazioni</h5>
+                    <h5 class="mb-0 fw-bold small-caps"><i class="fas fa-table me-2"></i>Dati Analitici e Autorizzazioni</h5>
                 </div>
                 <div class="card-body p-4">
                     <div class="row g-4">
                         <div class="col-md-4 border-end">
-                            <h6 class="fw-bold text-muted border-bottom pb-2 mb-3">Dettaglio Carichi</h6>
                             <div class="data-row"><span>AE Civili:</span><strong>{{ idriche.ae_civ|default:"-" }}</strong></div>
-                            <div class="data-row"><span>AE Industriali:</span><strong>{{ idriche.ae_ind|default:"-" }}</strong></div>
                             <div class="data-row"><span>Q Civile (l/s):</span><strong>{{ idriche.q_civ|default:"-" }}</strong></div>
-                            <div class="data-row"><span>Q Industriale (l/s):</span><strong>{{ idriche.q_ind|default:"-" }}</strong></div>
+                            <div class="data-row"><span>Qs (l/s):</span><strong>{{ idriche.qs|default:"-" }}</strong></div>
                         </div>
                         <div class="col-md-4 border-end">
-                            <h6 class="fw-bold text-muted border-bottom pb-2 mb-3">Verifiche Funzionali</h6>
-                            <div class="data-row"><span>Rapporto Qs/Qnm:</span><strong>{{ idriche.qs_qnm_ratio|default:"-" }}</strong></div>
-                            <div class="data-row"><span>Qs > Pavv:</span><strong>{{ idriche.qs_gt_pavv|default:"-" }}</strong></div>
-                            <div class="data-row"><span>Vasca Reg. Regionale:</span><strong>{{ idriche.vasca_reg_regionale|default:"-" }}</strong></div>
+                            <div class="data-row"><span>Vasca Reg. Reg:</span><strong>{{ idriche.vasca_reg_regionale|default:"-" }}</strong></div>
                             <div class="data-row"><span>Bacino (ha):</span><strong>{{ idriche.bacino_proprio_ha|default:"-" }}</strong></div>
+                            <div class="data-row"><span>Q Scolmata (l/s):</span><strong>{{ idriche.qscolmata_ls|default:"-" }}</strong></div>
                         </div>
                         <div class="col-md-4">
-                            <h6 class="fw-bold text-muted border-bottom pb-2 mb-3">Status Amministrativo</h6>
                             <div class="data-row"><span>Atto Provincia:</span><strong>{{ idriche.atto_provincia_n|default:"-" }}</strong></div>
-                            <div class="data-row"><span>Scadenza Prov:</span><strong class="text-danger">{{ idriche.scadenza_autorizzazione|default:"-" }}</strong></div>
-                            <div class="data-row"><span>Consorzio:</span><strong>{{ idriche.consorzio_competente|default:"-" }}</strong></div>
-                            <div class="data-row"><span>Scadenza Cons:</span><strong class="text-danger">{{ idriche.scadenza_concessione|default:"-" }}</strong></div>
+                            <div class="data-row"><span>Scadenza:</span><strong class="text-danger">{{ idriche.scadenza_autorizzazione|default:"-" }}</strong></div>
                         </div>
                     </div>
-                    
                     {% if idriche.note_autorizzazioni %}
-                    <div class="mt-4 p-3 bg-light rounded-4 border-start border-warning border-4">
-                        <h6 class="fw-bold mb-1"><i class="fas fa-sticky-note me-2"></i>Note:</h6>
+                    <div class="mt-3 p-3 bg-light rounded border-start border-warning border-4">
+                        <small class="fw-bold d-block mb-1">NOTE:</small>
                         <p class="mb-0 small text-dark">{{ idriche.note_autorizzazioni }}</p>
                     </div>
                     {% endif %}
@@ -123,90 +91,41 @@
         <div class="col-12">
             <div class="card shadow-sm border-0 rounded-4">
                 <div class="card-header bg-secondary text-white rounded-top-4 py-3 d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0 small-caps"><i class="fas fa-file-alt me-2"></i>Archivio Documentale</h5>
-                    <a href="{% url 'gestione_documenti' manufatto.id %}" class="btn btn-sm btn-light rounded-pill px-3 fw-bold">
-                        <i class="fas fa-plus-circle me-1"></i> Gestisci File
-                    </a>
+                    <h5 class="mb-0 fw-bold small-caps"><i class="fas fa-file-pdf me-2"></i>Documenti Allegati</h5>
+                    <a href="{% url 'gestione_documenti' manufatto.id %}" class="btn btn-sm btn-light rounded-pill px-3 fw-bold">Gestisci</a>
                 </div>
                 <div class="card-body">
                     {% if manufatto.documenti.all %}
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>Titolo Documento</th>
-                                        <th>Data Caricamento</th>
-                                        <th class="text-end">Azioni</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for doc in manufatto.documenti.all %}
-                                    <tr>
-                                        <td class="fw-bold">{{ doc.titolo }}</td>
-                                        <td class="text-muted small">{{ doc.data_caricamento|date:"d/m/Y H:i" }}</td>
-                                        <td class="text-end">
-                                            <a href="{% url 'scarica_documento' doc.id %}" class="btn btn-sm btn-outline-primary rounded-pill px-3">
-                                                <i class="fas fa-download me-1"></i> Scarica
-                                            </a>
-                                        </td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
+                        <table class="table table-sm table-hover align-middle">
+                            <tbody>
+                                {% for doc in manufatto.documenti.all %}
+                                <tr>
+                                    <td class="fw-bold">{{ doc.titolo }}</td>
+                                    <td class="text-end"><a href="{% url 'scarica_documento' doc.id %}" class="btn btn-sm btn-outline-primary rounded-pill px-3">Scarica</a></td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
                     {% else %}
-                        <div class="text-center py-4">
-                            <i class="fas fa-folder-open fa-3x text-muted mb-2"></i>
-                            <p class="text-muted mb-0">Nessun documento caricato per questo manufatto.</p>
-                        </div>
+                        <p class="text-center text-muted my-3">Nessun documento presente.</p>
                     {% endif %}
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="d-flex flex-wrap justify-content-between align-items-center mt-5 pt-4 border-top">
-        <a href="{% url 'lista_manufatti' %}" class="btn btn-outline-secondary rounded-pill px-4 shadow-sm mb-2 mb-md-0">
-            <i class="fas fa-arrow-left me-2"></i>Torna alla Lista
-        </a>
-
-        <div class="d-flex gap-2">
-            {% if ente_utente == 'TEA' or ente_utente == 'AATO' %}
-                <a href="{% url 'modifica_manufatto' manufatto.id %}" class="btn btn-warning rounded-pill px-4 shadow-sm fw-bold">
-                    <i class="fas fa-edit me-2"></i>Modifica Dati
-                </a>
-            {% endif %}
-            <a href="{% if ente_utente == 'AATO' %}{% url 'aato' %}{% else %}{% url 'tea' %}{% endif %}" class="btn btn-outline-primary rounded-pill px-4 shadow-sm">
-                <i class="fas fa-home me-2"></i>Home
-            </a>
-        </div>
+    <div class="d-flex justify-content-between mt-5 pt-3 border-top">
+        <a href="{% url 'lista_manufatti' %}" class="btn btn-outline-secondary rounded-pill px-4 shadow-sm"><i class="fas fa-arrow-left me-2"></i>Torna alla Lista</a>
+        {% if ente_utente == 'TEA' or ente_utente == 'AATO' %}
+            <a href="{% url 'modifica_manufatto' manufatto.id %}" class="btn btn-warning rounded-pill px-4 shadow-sm fw-bold">Modifica</a>
+        {% endif %}
     </div>
 </div>
 
 <style>
-    .detail-wrapper { margin-top: 20px !important; }
-    .small-caps { font-variant: small-caps; letter-spacing: 1px; }
-    .rounded-4 { border-radius: 15px !important; }
-    .rounded-top-4 { border-top-left-radius: 15px !important; border-top-right-radius: 15px !important; }
-    
-    .data-list p {
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 0.75rem;
-        border-bottom: 1px dashed #eee;
-        padding-bottom: 0.25rem;
-    }
-    .data-list strong { color: #555; }
-    
-    .data-row {
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 0.5rem;
-        font-size: 0.9rem;
-    }
-    .data-row span { color: #6c757d; }
-    .data-row strong { color: #333; }
-
-    .card-header h5 { font-size: 1.1rem; }
+    .rounded-4 { border-radius: 12px; }
+    .rounded-top-4 { border-top-left-radius: 12px; border-top-right-radius: 12px; }
+    .data-row { display: flex; justify-content: space-between; margin-bottom: 0.4rem; font-size: 0.9rem; border-bottom: 1px dashed #eee; padding-bottom: 2px; }
+    .small-caps { font-variant: small-caps; }
 </style>
 {% endblock %}
