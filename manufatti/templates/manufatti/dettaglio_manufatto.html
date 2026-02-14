@@ -1,131 +1,154 @@
 {% extends "accounts/base.html" %}
+{% load static %}
 
 {% block content %}
-<div class="container mt-4 pb-5">
-    <div class="d-flex justify-content-between align-items-end mb-4 border-bottom pb-3">
+<div class="container-fluid pb-5 px-4" style="margin-top: -30px; position: relative; z-index: 10;">
+    
+    <div class="d-flex justify-content-between align-items-center mb-2 border-bottom pb-2 bg-white p-3 rounded-3 shadow-sm">
         <div>
-            <h2 class="text-primary fw-bold mb-0">{{ manufatto.nome }}</h2>
-            <span class="text-muted small">Creato il {{ manufatto.data_creazione|date:"d/m/Y" }}</span>
+            <h2 class="text-primary fw-bold mb-0" style="font-size: 1.75rem;">
+                <i class="fas fa-tint me-2"></i>{{ manufatto.nome }}
+            </h2>
+            <p class="text-muted mb-0 small">
+                <i class="fas fa-map-marker-alt"></i> {{ manufatto.comune|default:"-" }} - {{ manufatto.localita|default:"-" }}
+            </p>
         </div>
-        <span class="badge {% if manufatto.stato == 'COMPLETATO' or manufatto.stato == 'IN ESECUZIONE' %}bg-success{% else %}bg-info text-dark{% endif %} rounded-pill px-4 py-2 fs-6 shadow-sm">
-            {{ manufatto.stato }}
-        </span>
+        <div class="text-end">
+            <span class="badge {% if manufatto.info_idriche.e_conforme == 'SI' %}bg-success{% else %}bg-danger{% endif %} rounded-pill px-3 py-2 shadow-sm">
+                CONFORMITÀ: {{ manufatto.info_idriche.e_conforme|default:"DA VERIFICARE" }}
+            </span>
+        </div>
     </div>
 
-    <div class="row g-4">
+    <div class="row g-3">
         <div class="col-md-4">
-            <div class="card shadow-sm border-0 rounded-4">
-                <div class="card-header bg-dark text-white rounded-top-4 py-3">
-                    <h5 class="mb-0 fw-bold small-caps"><i class="fas fa-map-pin me-2"></i>Localizzazione</h5>
+            <div class="card shadow-sm border-0 rounded-3 mb-3">
+                <div class="card-header bg-dark text-white py-2">
+                    <h6 class="mb-0 fw-bold text-uppercase"><i class="fas fa-info-circle me-2"></i>Inquadramento</h6>
                 </div>
-                <div class="card-body">
-                    <p class="mb-2"><strong>Comune:</strong> {{ manufatto.comune|default:"-" }}</p>
-                    <p class="mb-2"><strong>Località:</strong> {{ manufatto.localita|default:"-" }}</p>
-                    <p class="mb-3"><strong>Ubicazione:</strong> {{ manufatto.ubicazione|default:"-" }}</p>
-                    <div class="bg-light p-2 rounded text-center small border">
-                        <span class="d-block text-muted">Coordinate</span>
-                        <strong>{{ geografiche.latitudine|default:"-" }} , {{ geografiche.longitudine|default:"-" }}</strong>
+                <div class="card-body py-2">
+                    <div class="data-row-v"><label>Ubicazione</label><span>{{ manufatto.ubicazione|default:"-" }}</span></div>
+                    <div class="data-row-v"><label>Depuratore Associato</label><span class="text-primary fw-bold">{{ manufatto.depuratore_associato|default:"-" }}</span></div>
+                    <div class="data-row-v"><label>Tipo di Rete</label><span class="badge bg-secondary">{{ manufatto.tipologia_sfioratore|default:"di rete" }}</span></div>
+                    
+                    <hr class="my-2">
+                    
+                    <h6 class="small fw-bold text-uppercase text-muted mb-2">Coordinate GPS</h6>
+                    {% if manufatto.info_geografiche.latitudine and manufatto.info_geografiche.longitudine %}
+                        <div class="data-row"><span>Latitudine:</span> <strong>{{ manufatto.info_geografiche.latitudine|floatformat:6 }}</strong></div>
+                        <div class="data-row"><span>Longitudine:</span> <strong>{{ manufatto.info_geografiche.longitudine|floatformat:6 }}</strong></div>
+                        <div class="d-grid mt-2">
+                            <a href="https://www.google.com/maps/search/?api=1&query={{ manufatto.info_geografiche.latitudine }},{{ manufatto.info_geografiche.longitudine }}" 
+                               target="_blank" class="btn btn-primary btn-sm rounded-pill fw-bold shadow-sm">
+                                <i class="fas fa-map-marked-alt me-2"></i>VEDI SU GOOGLE MAPS
+                            </a>
+                        </div>
+                    {% else %}
+                        <p class="small text-muted italic text-center py-2 bg-light rounded">Coordinate non disponibili.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="card shadow-sm border-0 rounded-3">
+                <div class="card-header bg-dark text-white py-2">
+                    <h6 class="mb-0 fw-bold text-uppercase"><i class="fas fa-file-contract me-2"></i>Autorizzazioni</h6>
+                </div>
+                <div class="card-body py-2">
+                    <div class="p-2 bg-light rounded border mb-2">
+                        <small class="text-muted fw-bold">PROVINCIA</small>
+                        <div class="data-row"><span>Atto:</span> <strong>{{ manufatto.info_idriche.atto_provincia_n|default:"-" }}</strong></div>
+                        <div class="data-row"><span>Scadenza:</span> <strong class="text-danger">{{ manufatto.info_idriche.scadenza_autorizzazione|default:"-" }}</strong></div>
+                    </div>
+                    <div class="p-2 bg-light rounded border">
+                        <small class="text-muted fw-bold">CONSORZIO</small>
+                        <div class="data-row"><span>Scadenza:</span> <strong>{{ manufatto.info_idriche.scadenza_concessione|default:"-" }}</strong></div>
                     </div>
                 </div>
+            </div>
+            
+            <div class="d-grid mt-3">
+                <a href="{% url 'modifica_manufatto' manufatto.id %}" class="btn btn-outline-primary rounded-pill fw-bold">
+                    <i class="fas fa-edit me-2"></i>MODIFICA DATI
+                </a>
             </div>
         </div>
 
         <div class="col-md-8">
-            <div class="card shadow-sm border-0 rounded-4">
-                <div class="card-header bg-primary text-white rounded-top-4 py-3">
-                    <h5 class="mb-0 fw-bold small-caps"><i class="fas fa-info-circle me-2"></i>Sintesi Tecnica</h5>
+            <div class="card shadow-sm border-0 rounded-3 mb-3">
+                <div class="card-header bg-primary text-white py-2">
+                    <h6 class="mb-0 fw-bold text-uppercase"><i class="fas fa-calculator me-2"></i>Carichi e Portate Prodotte</h6>
                 </div>
-                <div class="card-body">
+                <div class="card-body py-2">
                     <div class="row">
                         <div class="col-md-6 border-end">
-                            <p><strong>Depuratore:</strong> {{ manufatto.depuratore_associato|default:"-" }}</p>
-                            <p><strong>Emissario:</strong> {{ manufatto.recapito_emissario|default:"-" }}</p>
-                            <p><strong>Tipologia:</strong> {{ manufatto.tipologia_sfioratore|default:"-" }}</p>
+                            <p class="text-primary small fw-bold text-uppercase mb-1">Abitanti Equivalenti (AE)</p>
+                            <div class="data-row"><span>AE Civili:</span> <strong>{{ manufatto.info_idriche.ae_civ|floatformat:1 }}</strong></div>
+                            <div class="data-row"><span>AE Industriali:</span> <strong>{{ manufatto.info_idriche.ae_ind|floatformat:1 }}</strong></div>
+                            <div class="data-row border-top pt-1"><span>AE Totali:</span> <strong class="text-primary">{{ manufatto.info_idriche.ae_tot|floatformat:1 }}</strong></div>
                         </div>
-                        <div class="col-md-6">
-                            <div class="d-flex justify-content-between"><span>AE Totali:</span><strong>{{ idriche.ae_tot|default:"0" }}</strong></div>
-                            <div class="d-flex justify-content-between"><span>Qnm (l/s):</span><strong>{{ idriche.qnm|default:"0" }}</strong></div>
-                            <div class="mt-3">
-                                <span class="badge {% if idriche.e_conforme == 'SI' %}bg-success{% else %}bg-danger{% endif %} w-100 py-2 rounded-pill shadow-sm">
-                                    CONFORMITÀ: {{ idriche.e_conforme|default:"N.D." }}
-                                </span>
+                        <div class="col-md-6 ps-4">
+                            <p class="text-primary small fw-bold text-uppercase mb-1">Portate (l/s)</p>
+                            <div class="data-row"><span>Q Civ:</span> <strong>{{ manufatto.info_idriche.q_civ|floatformat:3 }}</strong></div>
+                            <div class="data-row"><span>Q Ind:</span> <strong>{{ manufatto.info_idriche.q_ind|floatformat:3 }}</strong></div>
+                            <div class="data-row"><span>Qnm:</span> <strong class="text-info">{{ manufatto.info_idriche.qnm|floatformat:3 }}</strong></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow-sm border-0 rounded-3 mb-3">
+                <div class="card-header bg-primary text-white py-2">
+                    <h6 class="mb-0 fw-bold text-uppercase"><i class="fas fa-chart-line me-2"></i>Sintesi Idraulica e Rapporti</h6>
+                </div>
+                <div class="card-body py-2">
+                    <div class="row">
+                        <div class="col-md-6 border-end">
+                            <div class="data-row"><span>Qs (l/s):</span> <strong>{{ manufatto.info_idriche.qs|floatformat:2 }}</strong></div>
+                            <div class="data-row"><span>Pavv (l/s):</span> <strong>{{ manufatto.info_idriche.pavv|floatformat:2 }}</strong></div>
+                            <div class="data-row"><span>Qs / Qnm:</span> <strong>{{ manufatto.info_idriche.qs_qnm_ratio }}</strong></div>
+                        </div>
+                        <div class="col-md-6 ps-4">
+                            <div class="data-row"><span>Qs > Pavv:</span> <strong>{{ manufatto.info_idriche.qs_gt_pavv }}</strong></div>
+                            <div class="data-row mt-1 bg-warning bg-opacity-10 p-1 rounded border border-warning border-opacity-25">
+                                <span>Qs / Pavv (Ratio):</span> <strong class="text-danger">{{ manufatto.info_idriche.qs_pavv_ratio }}</strong>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <div class="col-12">
-            <div class="card shadow-sm border-0 rounded-4">
-                <div class="card-header bg-info text-dark rounded-top-4 py-3">
-                    <h5 class="mb-0 fw-bold small-caps"><i class="fas fa-table me-2"></i>Dati Analitici e Autorizzazioni</h5>
+            <div class="card shadow-sm border-0 rounded-3">
+                <div class="card-header bg-secondary text-white py-2">
+                    <h6 class="mb-0 fw-bold text-uppercase"><i class="fas fa-balance-scale me-2"></i>Verifiche e Bacino</h6>
                 </div>
-                <div class="card-body p-4">
-                    <div class="row g-4">
-                        <div class="col-md-4 border-end">
-                            <div class="data-row"><span>AE Civili:</span><strong>{{ idriche.ae_civ|default:"-" }}</strong></div>
-                            <div class="data-row"><span>Q Civile (l/s):</span><strong>{{ idriche.q_civ|default:"-" }}</strong></div>
-                            <div class="data-row"><span>Qs (l/s):</span><strong>{{ idriche.qs|default:"-" }}</strong></div>
+                <div class="card-body py-2">
+                    <div class="row">
+                        <div class="col-md-6 border-end">
+                            <div class="data-row"><span>Tipologia Sfioro:</span> <strong>{{ manufatto.info_idriche.tipologia_sfioro_rr6|default:"-" }}</strong></div>
+                            <div class="data-row"><span>Vasca Reg. Regionale:</span> <strong>{{ manufatto.info_idriche.vasca_reg_regionale|default:"-" }}</strong></div>
+                            <div class="data-row"><span>Bacino Proprio (ha):</span> <strong>{{ manufatto.info_idriche.bacino_proprio_ha|floatformat:2 }}</strong></div>
+                            <div class="data-row"><span>ha imp:</span> <strong>{{ manufatto.info_idriche.ha_imp|floatformat:2 }}</strong></div>
                         </div>
-                        <div class="col-md-4 border-end">
-                            <div class="data-row"><span>Vasca Reg. Reg:</span><strong>{{ idriche.vasca_reg_regionale|default:"-" }}</strong></div>
-                            <div class="data-row"><span>Bacino (ha):</span><strong>{{ idriche.bacino_proprio_ha|default:"-" }}</strong></div>
-                            <div class="data-row"><span>Q Scolmata (l/s):</span><strong>{{ idriche.qscolmata_ls|default:"-" }}</strong></div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="data-row"><span>Atto Provincia:</span><strong>{{ idriche.atto_provincia_n|default:"-" }}</strong></div>
-                            <div class="data-row"><span>Scadenza:</span><strong class="text-danger">{{ idriche.scadenza_autorizzazione|default:"-" }}</strong></div>
+                        <div class="col-md-6 ps-4">
+                            <div class="data-row"><span>Portata Specifica:</span> <strong>{{ manufatto.info_idriche.portata_specifica_scarico|floatformat:2 }}</strong></div>
+                            <div class="data-row"><span>Q Scolmata (l/s):</span> <strong class="text-info">{{ manufatto.info_idriche.qscolmata_ls|floatformat:2 }}</strong></div>
+                            <div class="data-row"><span>Vasca PTUA:</span> <strong>{{ manufatto.info_idriche.vasca_ptua|default:"-" }}</strong></div>
+                            <div class="data-row"><span>Q Meteo Ingresso:</span> <strong>{{ manufatto.info_idriche.q_meteo_ingresso_ls|floatformat:2 }}</strong></div>
                         </div>
                     </div>
-                    {% if idriche.note_autorizzazioni %}
-                    <div class="mt-3 p-3 bg-light rounded border-start border-warning border-4">
-                        <small class="fw-bold d-block mb-1">NOTE:</small>
-                        <p class="mb-0 small text-dark">{{ idriche.note_autorizzazioni }}</p>
-                    </div>
-                    {% endif %}
                 </div>
             </div>
         </div>
-
-        <div class="col-12">
-            <div class="card shadow-sm border-0 rounded-4">
-                <div class="card-header bg-secondary text-white rounded-top-4 py-3 d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0 fw-bold small-caps"><i class="fas fa-file-pdf me-2"></i>Documenti Allegati</h5>
-                    <a href="{% url 'gestione_documenti' manufatto.id %}" class="btn btn-sm btn-light rounded-pill px-3 fw-bold">Gestisci</a>
-                </div>
-                <div class="card-body">
-                    {% if manufatto.documenti.all %}
-                        <table class="table table-sm table-hover align-middle">
-                            <tbody>
-                                {% for doc in manufatto.documenti.all %}
-                                <tr>
-                                    <td class="fw-bold">{{ doc.titolo }}</td>
-                                    <td class="text-end"><a href="{% url 'scarica_documento' doc.id %}" class="btn btn-sm btn-outline-primary rounded-pill px-3">Scarica</a></td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    {% else %}
-                        <p class="text-center text-muted my-3">Nessun documento presente.</p>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="d-flex justify-content-between mt-5 pt-3 border-top">
-        <a href="{% url 'lista_manufatti' %}" class="btn btn-outline-secondary rounded-pill px-4 shadow-sm"><i class="fas fa-arrow-left me-2"></i>Torna alla Lista</a>
-        {% if ente_utente == 'TEA' or ente_utente == 'AATO' %}
-            <a href="{% url 'modifica_manufatto' manufatto.id %}" class="btn btn-warning rounded-pill px-4 shadow-sm fw-bold">Modifica</a>
-        {% endif %}
     </div>
 </div>
 
 <style>
-    .rounded-4 { border-radius: 12px; }
-    .rounded-top-4 { border-top-left-radius: 12px; border-top-right-radius: 12px; }
-    .data-row { display: flex; justify-content: space-between; margin-bottom: 0.4rem; font-size: 0.9rem; border-bottom: 1px dashed #eee; padding-bottom: 2px; }
-    .small-caps { font-variant: small-caps; }
+    .data-row { display: flex; justify-content: space-between; border-bottom: 1px dashed #eee; padding: 0.3rem 0; font-size: 0.88rem; }
+    .data-row:last-child { border-bottom: none; }
+    .data-row-v label { display: block; font-size: 0.68rem; color: #6c757d; text-transform: uppercase; font-weight: bold; margin-bottom: 0px; }
+    .data-row-v span { display: block; font-size: 0.92rem; font-weight: 500; margin-bottom: 0.5rem; }
+    .card-header { padding-top: 0.4rem !important; padding-bottom: 0.4rem !important; }
+    .card { animation: fadeIn 0.6s ease-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 </style>
 {% endblock %}

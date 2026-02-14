@@ -4,18 +4,8 @@
 {% block title %}Nuovo Manufatto{% endblock %}
 
 {% block content %}
-<div class="main-box" style="
-    max-width: 1000px; /* Ancora un po' più largo per ospitare bene 2 colonne */
-    margin: -70px auto 30px auto; 
-    padding: 25px 40px;
-    background: white;
-    border-radius: 15px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-    animation: slideInDown 0.8s ease-out;
-    position: relative;
-    z-index: 10;
-">
-    <h2 class="text-center" style="font-size: 2em; margin-bottom: 25px; color: #333; font-weight: bold;">
+<div class="main-box-large">
+    <h2 class="text-center page-title">
         <i class="fas fa-plus-circle text-success me-2"></i>Creazione nuovo manufatto
     </h2>
 
@@ -23,68 +13,131 @@
         {% csrf_token %}
 
         <div class="card border-0 bg-light mb-4 shadow-sm">
-            <div class="card-body">
-                <h4 class="text-primary mb-3" style="font-size: 1.2em; border-bottom: 2px solid #0d6efd; display: inline-block; padding-bottom: 5px;">
-                    <i class="fas fa-info-circle me-2"></i>Dati Generali Manufatto
+            <div class="card-body p-3">
+                <h4 class="section-subtitle">
+                    <i class="fas fa-info-circle me-2"></i>Dati Generali
                 </h4>
-                <div class="row text-start">
-                    <div class="form-grid">
-                        {{ form_manufatto }}
-                    </div>
+                <div class="form-grid">
+                    {{ form_manufatto }}
                 </div>
             </div>
         </div>
 
-        <div class="mb-3">
-            <button type="button" class="btn btn-outline-dark w-100 py-3 fw-bold shadow-sm d-flex justify-content-between align-items-center"
-                    onclick="toggleSection('info-idriche')">
+        <div class="mb-2">
+            <button type="button" class="btn btn-accordion shadow-sm" onclick="toggleSection('info-idriche')">
                 <span><i class="fas fa-faucet-drip me-2"></i>INFO IDRAULICHE / SFIORI</span>
                 <i class="fas fa-chevron-down"></i>
             </button>
-            <div id="info-idriche" style="display: none;" class="text-start mt-2 p-4 border rounded bg-white shadow-sm">
+            <div id="info-idriche" style="display: none;" class="accordion-content shadow-sm">
                 <div class="form-grid">
                     {{ form_idriche }}
                 </div>
             </div>
         </div>
 
-        <div class="mb-3">
-            <button type="button" class="btn btn-outline-dark w-100 py-3 fw-bold shadow-sm d-flex justify-content-between align-items-center"
-                    onclick="toggleSection('info-geografiche')">
+        <div class="mb-2">
+            <button type="button" class="btn btn-accordion shadow-sm" onclick="toggleSection('info-geografiche')">
                 <span><i class="fas fa-map-marked-alt me-2"></i>INFO GEOGRAFICHE / GPS</span>
                 <i class="fas fa-chevron-down"></i>
             </button>
-            <div id="info-geografiche" style="display: none;" class="text-start mt-2 p-4 border rounded bg-white shadow-sm">
+            <div id="info-geografiche" style="display: none;" class="accordion-content shadow-sm">
                 <div class="form-grid">
                     {{ form_geografiche }}
                 </div>
             </div>
         </div>
 
-        <div class="text-center mt-5">
-            <button type="submit" class="btn btn-primary btn-lg rounded-pill shadow px-5 fw-bold">
-                <i class="fas fa-save me-2"></i>SALVA MANUFATTO NEL SISTEMA
+        <div class="text-center mt-4">
+            <button type="submit" class="btn btn-primary btn-save shadow">
+                <i class="fas fa-save me-2"></i>SALVA MANUFATTO
             </button>
         </div>
     </form>
 
-    <hr class="my-4">
+    <hr class="my-3">
 
     <div class="text-center">
         <a href="{% url 'lista_manufatti' %}" class="btn btn-sm btn-outline-secondary rounded-pill px-4">
-            <i class="fas fa-chevron-left me-1"></i> Torna alla lista completa
+            <i class="fas fa-chevron-left me-1"></i> Torna alla lista
         </a>
     </div>
 </div>
 
+<style>
+    .main-box-large {
+        width: 95%;
+        max-width: 1250px;
+        margin: -30px auto 30px auto; 
+        padding: 25px 35px;
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        animation: slideInDown 0.8s ease-out;
+        position: relative;
+        z-index: 10;
+    }
+
+    .page-title { font-size: 1.6rem; margin-bottom: 25px; color: #2c3e50; font-weight: 700; }
+
+    .section-subtitle {
+        font-size: 1rem; 
+        color: #0d6efd; 
+        border-bottom: 2px solid #0d6efd; 
+        display: inline-block; 
+        padding-bottom: 3px; 
+        margin-bottom: 20px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px 25px;
+        text-align: left;
+    }
+
+    .form-grid p { margin-bottom: 0; display: flex; flex-direction: column; }
+    
+    /* Riduzione dimensione etichette */
+    .form-grid label { font-weight: 600; margin-bottom: 4px; color: #555; font-size: 0.85rem; }
+    
+    /* Riduzione dimensione campi input */
+    .form-grid input, .form-grid select, .form-grid textarea {
+        width: 100%; padding: 8px 12px; border: 1px solid #ced4da; border-radius: 6px; 
+        background-color: #fff; font-size: 0.9rem; transition: all 0.2s;
+    }
+    .form-grid input:focus { border-color: #0d6efd; outline: none; box-shadow: 0 0 0 3px rgba(13,110,253,0.1); }
+
+    .btn-accordion {
+        width: 100%; padding: 12px 20px; font-weight: 600; font-size: 0.9rem; border: 1px solid #dee2e6; 
+        border-radius: 8px; display: flex; justify-content: space-between; align-items: center; 
+        background: #fff; transition: 0.2s; color: #444;
+    }
+    .btn-accordion:hover { background: #f8f9fa; border-color: #bbb; }
+    
+    .accordion-content { margin-top: 5px; padding: 20px; border-radius: 8px; background: #fafafa; border: 1px solid #eee; }
+
+    .btn-save { border-radius: 50px; padding: 10px 40px; font-weight: 600; font-size: 1rem; }
+
+    @keyframes slideInDown { from { transform: translateY(-30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+    @media (max-width: 1100px) { .form-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 768px) {
+        .form-grid { grid-template-columns: 1fr; }
+        .main-box-large { margin-top: 15px !important; padding: 20px !important; }
+        .page-title { font-size: 1.3rem; }
+    }
+</style>
+
 <script>
 function toggleSection(id) {
     const section = document.getElementById(id);
-    const icon = event.currentTarget.querySelector('.fa-chevron-down, .fa-chevron-up');
-    
+    const btn = event.currentTarget;
+    const icon = btn.querySelector('.fa-chevron-down, .fa-chevron-up');
     if (section.style.display === "none") {
         section.style.display = "block";
-        section.style.animation = "fadeIn 0.4s ease-out";
         if(icon) icon.classList.replace('fa-chevron-down', 'fa-chevron-up');
     } else {
         section.style.display = "none";
@@ -92,41 +145,4 @@ function toggleSection(id) {
     }
 }
 </script>
-
-<style>
-    /* GRIGLIA ORIZZONTALE PER I FORM */
-    .form-grid {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr); /* Crea due colonne uguali */
-        gap: 15px 30px; /* Spazio tra i campi */
-    }
-
-    /* Stile per le etichette e i campi generati da Django */
-    .form-grid p {
-        margin-bottom: 0;
-        display: flex;
-        flex-direction: column;
-    }
-
-    .form-grid label {
-        font-weight: 600;
-        margin-bottom: 5px;
-        color: #495057;
-    }
-
-    .form-grid input, .form-grid select, .form-grid textarea {
-        width: 100%;
-        padding: 10px;
-        border: 1px solid #ced4da;
-        border-radius: 6px;
-        background-color: #fff;
-    }
-
-    /* Se un campo deve occupare tutta la larghezza (es. Note) */
-    .form-grid p:last-child:nth-child(odd) {
-        grid-column: span 2;
-    }
-
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-</style>
 {% endblock %}

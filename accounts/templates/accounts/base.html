@@ -8,20 +8,23 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
     <style>
-        body { background-color: #f8f9fa; min-height: 100vh; }
+        body { background-color: #f8f9fa; min-height: 100vh; margin: 0; padding: 0; }
         
+        /* HEADER FISSO */
         .header { 
             background-color: #c40000; 
             color: white; 
-            padding: 12px 0; 
+            padding: 15px 0; 
             text-align: center; 
             font-weight: bold; 
             position: sticky;
             top: 0;
             z-index: 2000; 
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            line-height: 1.4;
         }
         
+        /* PULSANTI NAVIGAZIONE */
         .nav-buttons { 
             position: absolute; 
             top: 50%; 
@@ -45,29 +48,37 @@
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); 
             transition: all 0.2s;
         }
-        .btn-nav:hover { background-color: #ffe5e5; transform: scale(1.1); }
+        .btn-nav:hover { background-color: #ffe5e5; transform: scale(1.1); color: #c40000; }
 
-        .logo-top { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            padding: 20px 60px 40px 60px; 
-            position: relative;
-            z-index: 10;
-        }
-
-        .logos-column {
+        /* SEZIONE LOGHI CENTRATI (Senza Mappa) */
+        .logo-section {
             display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 15px; 
+            justify-content: center;
+            align-items: center;
+            padding: 40px 20px;
+            background-color: transparent;
         }
-        
-        .img-map-top { opacity: 0.25; filter: grayscale(60%); pointer-events: none; }
 
+        .logos-row {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            gap: 50px; /* Spazio generoso tra i loghi */
+            flex-wrap: wrap; /* Adattabilità per schermi piccoli */
+        }
+
+        .logo-item {
+            height: auto;
+            max-width: 100%;
+            transition: transform 0.3s ease;
+        }
+        .logo-item:hover { transform: scale(1.05); }
+
+        /* MESSAGGI DI SISTEMA */
         .messages-container {
             max-width: 600px;
-            margin: -20px auto 20px auto;
+            margin: 0 auto 20px auto;
             position: relative;
             z-index: 1000;
         }
@@ -80,10 +91,20 @@
             animation: slideInDown 0.4s ease-out;
         }
 
-        @keyframes slideInDown { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes slideInDown { 
+            from { transform: translateY(-20px); opacity: 0; } 
+            to { transform: translateY(0); opacity: 1; } 
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .logos-row { gap: 30px; }
+            .header { font-size: 0.9rem; padding: 12px 40px; }
+        }
     </style>
 </head>
 <body>
+
     <div class="header">
         <div class="nav-buttons">
             {% if user.is_authenticated %}
@@ -100,14 +121,13 @@
         Sistema provinciale di monitoraggio sfiori<br>Provincia di Mantova
     </div>
 
-    <div class="logo-top">
-        <div class="logos-column">
+    <div class="logo-section">
+        <div class="logos-row">
             {% load static %}
-            <img src="{% static 'provincia_mantova.png' %}" alt="Logo Provincia" style="height: 80px; width: auto;">
-            <img src="{% static 'aato_logo.png' %}" alt="Logo AATO" style="height: 30px; width: auto;">
-            <img src="{% static 'LogoAqA.jpeg' %}" alt="Logo AqA" style="height: 30px; width: auto;">
+            <img src="{% static 'provincia_mantova.png' %}" alt="Logo Provincia" style="height: 85px;" class="logo-item">
+            <img src="{% static 'aato_logo.png' %}" alt="Logo AATO" style="height: 45px;" class="logo-item">
+            <img src="{% static 'LogoAqA.jpeg' %}" alt="Logo AqA" style="height: 45px;" class="logo-item">
         </div>
-        <img src="{% static 'mappa.jpg' %}" alt="Mappa Mantova" width="140" class="img-map-top">
     </div>
 
     <div class="container messages-container">
@@ -122,7 +142,9 @@
     </div>
 
     <div class="main-content">
-        {% block content %}{% endblock %}
+        <div class="container">
+            {% block content %}{% endblock %}
+        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
