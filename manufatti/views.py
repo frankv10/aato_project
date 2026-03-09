@@ -22,14 +22,15 @@ from .models import (
 
 # Funzione di utilità per ottenere l'ente utente in modo robusto
 def get_user_ente(user):
-    if user.is_authenticated:
-        try:
-            return user.profilo.ente
-        except Profilo.DoesNotExist:
-            return 'TEA'
-        except AttributeError:
-            return 'TEA'
-    return 'TEA'
+    """Recupera l'ente dell'utente in modo sicuro."""
+    if not user.is_authenticated:
+        return 'GUEST'
+    try:
+        # Forza il caricamento del profilo
+        profilo = Profilo.objects.get(user=user)
+        return profilo.ente if profilo.ente else 'TEA'
+    except Profilo.DoesNotExist:
+        return 'TEA'
 
 
 @login_required
@@ -444,12 +445,13 @@ def import_manufatti(request):
     if request.method == 'POST' and request.FILES.get('myfile'):
         excel_file = request.FILES['myfile']
         try:
-            Manufatto.objects.all().delete()
             xls = pd.ExcelFile(excel_file)
+            # Cerca il foglio che contiene 'riassuntiva' nel nome
             target_sheet = next((s for s in xls.sheet_names if 'riassuntiva' in s.lower()), xls.sheet_names[0])
             df_raw = pd.read_excel(excel_file, sheet_name=target_sheet, header=None)
-            df_finale = None
             
+            df_finale = None
+            # Cerca la riga di intestazione che contiene la parola 'codice'
             for i in range(min(100, len(df_raw))):
                 row_values = [str(val).lower().strip() for val in df_raw.iloc[i].values]
                 if 'codice' in row_values:
@@ -458,69 +460,104 @@ def import_manufatti(request):
                     break
 
             if df_finale is not None:
-                count = 0
+                codici_presenti_nel_file = []
+                count_created = 0
+                count_updated = 0
+                
                 for _, row in df_finale.iterrows():
                     codice = str(row.get('codice', '')).strip()
-                    if not codice: continue
+                    if not codice or codice == 'nan': 
+                        continue
 
-                    m = Manufatto.objects.create(
+                    # Teniamo traccia del codice per la sincronizzazione finale
+                    codici_presenti_nel_file.append(codice)
+
+                    # 1. Aggiorna o crea il Manufatto base
+                    manufatto, created = Manufatto.objects.update_or_create(
                         nome=codice,
-                        comune=row.get('comune'),
-                        localita=row.get('localita'),
-                        ubicazione=row.get('ubicazione'),
-                        depuratore_associato=row.get('depuratore associato'),
-                        recapito_emissario=row.get('recapito emissario'),
-                        tipologia_sfioratore=row.get('tipo')
+                        defaults={
+                            'stato': 'IN ESERCIZIO',
+                            'comune': row.get('comune'),
+                            'localita': row.get('localita'),
+                            'ubicazione': row.get('ubicazione'),
+                            'depuratore_associato': row.get('depuratore associato'),
+                            'recapito_emissario': row.get('recapito emissario'),
+                            'tipologia_sfioratore': row.get('tipo')
+                        }
+                    )
+                    
+                    if created: count_created += 1
+                    else: count_updated += 1
+
+                    # 2. Aggiorna o crea Info Idriche
+                    info_idriche.objects.update_or_create(
+                        manufatto=manufatto,
+                        defaults={
+                            'ae_civ': safe_float(row.get('ae civ')),
+                            'ae_ind': safe_float(row.get('ae ind')),
+                            'ae_tot': safe_float(row.get('ae tot')),
+                            'q_civ': safe_float(row.get('q civ')),
+                            'q_ind': safe_float(row.get('q ind')),
+                            'qnm': safe_float(row.get('qnm')),
+                            'qs': safe_float(row.get('qs')),
+                            'pavv': safe_float(row.get('pavv')),
+                            'qs_qnm_ratio': clean_ratio(row.get('qs/qnm')),
+                            'qs_gt_pavv': str(row.get('qs > pavv', '-')),
+                            'qs_pavv_ratio': clean_ratio(row.get('qs/pavv')),
+                            'tipologia_sfioro_rr6': row.get('tipologia'),
+                            'e_conforme': row.get('è conforme?'),
+                            'vasca_reg_regionale': row.get('vasca reg. regionale'),
+                            'bacino_proprio_ha': safe_float(row.get('bacino proprio (ha)')),
+                            'q_meteo_ingresso_ls': safe_float(row.get('q meteo in ingresso al manufatto (l/s)')),
+                            'q_limite_ingresso_ls': safe_float(row.get('q limite ingresso al manufatto (l/s)')),
+                            'manufatto_limitante': row.get('manufatto limitante'),
+                            'portata_specifica_scarico': safe_float(row.get('portata specifica allo scarico [l/s haimp]')),
+                            'ha_imp': safe_float(row.get('ha imp')),
+                            'qscolmata_ls': safe_float(row.get('qscolmata l/s')),
+                            'vasca_ptua': row.get('vasca ptua'),
+                            'scadenza_autorizzazione': str(row.get('scadenza autorizzazione provincia', '')),
+                            'atto_provincia_n': str(row.get('atto provincia n°', '')),
+                            'consorzio_competente': row.get('consorzio competente'),
+                            'scadenza_concessione': str(row.get('scadenza concessione consorzio', '')),
+                            'atto_consorzio_n': str(row.get('atto consorzio n°', '')),
+                            'note_autorizzazioni': row.get('note autorizzazioni /concessioni')
+                        }
                     )
 
-                    info_idriche.objects.create(
-                        manufatto=m,
-                        ae_civ=safe_float(row.get('ae civ')),
-                        ae_ind=safe_float(row.get('ae ind')),
-                        ae_tot=safe_float(row.get('ae tot')),
-                        q_civ=safe_float(row.get('q civ')),
-                        q_ind=safe_float(row.get('q ind')),
-                        qnm=safe_float(row.get('qnm')),
-                        qs=safe_float(row.get('qs')),
-                        pavv=safe_float(row.get('pavv')),
-                        qs_qnm_ratio=clean_ratio(row.get('qs/qnm')),
-                        qs_gt_pavv=str(row.get('qs > pavv', '-')),
-                        qs_pavv_ratio=clean_ratio(row.get('qs/pavv')),
-                        tipologia_sfioro_rr6=row.get('tipologia'),
-                        e_conforme=row.get('è conforme?'),
-                        vasca_reg_regionale=row.get('vasca reg. regionale'),
-                        bacino_proprio_ha=safe_float(row.get('bacino proprio (ha)')),
-                        q_meteo_ingresso_ls=safe_float(row.get('q meteo in ingresso al manufatto (l/s)')),
-                        q_limite_ingresso_ls=safe_float(row.get('q limite ingresso al manufatto (l/s)')),
-                        manufatto_limitante=row.get('manufatto limitante'),
-                        portata_specifica_scarico=safe_float(row.get('portata specifica allo scarico [l/s haimp]')),
-                        ha_imp=safe_float(row.get('ha imp')),
-                        qscolmata_ls=safe_float(row.get('qscolmata l/s')),
-                        vasca_ptua=row.get('vasca ptua'),
-                        scadenza_autorizzazione=str(row.get('scadenza autorizzazione provincia', '')),
-                        atto_provincia_n=str(row.get('atto provincia n°', '')),
-                        consorzio_competente=row.get('consorzio competente'),
-                        scadenza_concessione=str(row.get('scadenza concessione consorzio', '')),
-                        atto_consorzio_n=str(row.get('atto consorzio n°', '')),
-                        note_autorizzazioni=row.get('note autorizzazioni /concessioni')
-                    )
-
-                    # --- PRELIEVO COORDINATE ---
+                    # 3. Aggiorna o crea Info Geografiche
                     coord_raw = str(row.get('coordinate', '')).strip()
-                    if coord_raw and ',' in coord_raw:
+                    if coord_raw and ',' in coord_raw and coord_raw != 'nan':
                         try:
                             lat_s, lon_s = coord_raw.split(',')
-                            info_geografiche.objects.create(
-                                manufatto=m,
-                                latitudine=float(lat_s.strip()),
-                                longitudine=float(lon_s.strip())
+                            info_geografiche.objects.update_or_create(
+                                manufatto=manufatto,
+                                defaults={
+                                    'latitudine': float(lat_s.strip()),
+                                    'longitudine': float(lon_s.strip())
+                                }
                             )
                         except: pass
 
-                    count += 1
-                messages.success(request, "Importazione completata.")
+                # --- FASE DI RIMOZIONE MANUFATTI OBSOLETI ---
+                # Eliminiamo tutti i manufatti il cui nome NON è nella lista di quelli appena importati
+                query_eliminazione = Manufatto.objects.exclude(nome__in=codici_presenti_nel_file)
+                count_eliminati = query_eliminazione.count()
+                query_eliminazione.delete()
+
+                messages.success(
+                    request, 
+                    f"Importazione completata con successo. "
+                    f"Risultato: {count_created} nuovi, {count_updated} aggiornati. "
+                    f"{count_eliminati} manufatti (non presenti nel file) sono stati rimossi dal database."
+                )
                 return redirect('lista_manufatti')
+                
+            else:
+                messages.error(request, "Non è stata trovata la colonna 'Codice' nel file Excel.")
+                
         except Exception as e:
-            messages.error(request, f"Errore: {str(e)}")
+            messages.error(request, f"Errore durante l'elaborazione del file: {str(e)}")
+            
         return redirect('lista_manufatti')
+        
     return render(request, 'manufatti/upload_excel.html')

@@ -68,7 +68,10 @@
                 </div>
             </div>
 
-            <div class="d-grid mt-3">
+            <div class="d-grid gap-2 mt-3">
+                <a href="{% url 'gestione_documenti' manufatto.id %}" class="btn btn-dark rounded-pill fw-bold shadow-sm">
+                    <i class="fas fa-file-alt me-2"></i>GESTIONE DOCUMENTI
+                </a>
                 <a href="{% url 'modifica_manufatto' manufatto.id %}" class="btn btn-outline-primary rounded-pill fw-bold shadow-sm">
                     <i class="fas fa-edit me-2"></i>MODIFICA DATI
                 </a>

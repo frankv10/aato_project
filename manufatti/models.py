@@ -3,14 +3,13 @@ from django.db import models
 
 
 class Manufatto(models.Model):
-    nome = models.CharField(max_length=100) 
+    nome = models.CharField(max_length=100, unique=True)
     stato = models.CharField(
         max_length=50, 
         choices=[
-            ('PROGRAMMATO', 'PROGRAMMATO'),
-            ('IN ESECUZIONE', 'IN ESECUZIONE'),
+                ('IN ESERCIZIO', 'IN ESERCIZIO'),
         ],
-        default='IN ESECUZIONE'  # Stato base come richiesto
+        default='IN ESERCIZIO'
     )
     data_creazione = models.DateTimeField(auto_now_add=True)
 
@@ -66,3 +65,12 @@ class Documento(models.Model):
     titolo = models.CharField(max_length=200)
     file = models.FileField(upload_to='documenti/%Y/%m/%d/')
     data_caricamento = models.DateTimeField(auto_now_add=True)
+
+def ente_utente_context(request):
+    if request.user.is_authenticated:
+        try:
+            # Recupera l'ente dal profilo collegato all'utente loggato
+            return {'ente_utente': request.user.profilo.ente}
+        except:
+            return {'ente_utente': 'TEA'} # Fallback di sicurezza
+    return {'ente_utente': None}
