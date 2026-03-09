@@ -50,7 +50,7 @@
         }
         .btn-nav:hover { background-color: #ffe5e5; transform: scale(1.1); color: #c40000; }
 
-        /* SEZIONE LOGHI CENTRATI (Senza Mappa) */
+        /* SEZIONE LOGHI CENTRATI */
         .logo-section {
             display: flex;
             justify-content: center;
@@ -64,8 +64,8 @@
             flex-direction: row;
             align-items: center;
             justify-content: center;
-            gap: 50px; /* Spazio generoso tra i loghi */
-            flex-wrap: wrap; /* Adattabilità per schermi piccoli */
+            gap: 50px; 
+            flex-wrap: wrap; 
         }
 
         .logo-item {
@@ -96,7 +96,6 @@
             to { transform: translateY(0); opacity: 1; } 
         }
 
-        /* RESPONSIVE */
         @media (max-width: 768px) {
             .logos-row { gap: 30px; }
             .header { font-size: 0.9rem; padding: 12px 40px; }
@@ -111,11 +110,24 @@
                 <a href="javascript:history.back()" class="btn-nav" title="Torna indietro">
                     <i class="fas fa-arrow-left"></i>
                 </a>
-                {% if ente_utente == 'AATO' %}
-                    <a href="{% url 'aato' %}" class="btn-nav" title="Home AATO"><i class="fas fa-home"></i></a>
+
+                {% if ente_utente == 'ADMIN' %}
+                    <a href="{% url 'admin_dashboard' %}" class="btn-nav" title="Pannello Admin">
+                        <i class="fas fa-user-shield"></i>
+                    </a>
+                {% elif ente_utente == 'AATO' %}
+                    <a href="{% url 'aato' %}" class="btn-nav" title="Home AATO">
+                        <i class="fas fa-home"></i>
+                    </a>
                 {% else %}
-                    <a href="{% url 'tea' %}" class="btn-nav" title="Home Tea"><i class="fas fa-home"></i></a>
+                    <a href="{% url 'tea' %}" class="btn-nav" title="Home AqA">
+                        <i class="fas fa-home"></i>
+                    </a>
                 {% endif %}
+                
+                <a href="{% url 'logout' %}" class="btn-nav" title="Logout">
+                    <i class="fas fa-sign-out-alt"></i>
+                </a>
             {% endif %}
         </div>
         Sistema provinciale di monitoraggio sfiori<br>Provincia di Mantova
@@ -148,7 +160,6 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
     {% block extra_js %}{% endblock %}
 </body>
 </html>

@@ -3,7 +3,8 @@ from django.contrib.auth.models import User
 
 ENTI = [
     ('AATO', 'AATO'),
-    ('TEA', 'AqA'), 
+    ('TEA', 'AqA'),
+    ('ADMIN', 'Amministratore di Sistema'),
 ]
 
 class Profilo(models.Model):

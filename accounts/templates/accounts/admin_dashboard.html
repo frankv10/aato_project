@@ -1,0 +1,54 @@
+{% extends "accounts/base.html" %}
+
+{% block title %}Amministrazione Sistema{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow">
+        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+            <h4 class="mb-0">Gestione Account di Sistema</h4>
+            <span class="badge bg-secondary">{{ utenti|length }} Utenti Totali</span>
+        </div>
+        <div class="card-body p-0">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Username</th>
+                        <th>Nome Completo</th>
+                        <th>Ente</th>
+                        <th class="text-center">Azioni</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for u in utenti %}
+                    <tr>
+                        <td><strong>{{ u.username }}</strong></td>
+                        <td>{{ u.first_name }} {{ u.last_name }}</td>
+                        <td>
+                            {% if u.profilo.ente == 'AATO' %}
+                                <span class="badge bg-primary">AATO</span>
+                            {% elif u.profilo.ente == 'ADMIN' %}
+                                <span class="badge bg-dark">ADMIN</span>
+                            {% else %}
+                                <span class="badge bg-success">AqA</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-center">
+                            {% if u.id != user.id %}
+                                <a href="{% url 'elimina_utente' u.id %}" 
+                                   class="btn btn-sm btn-outline-danger" 
+                                   onclick="return confirm('Sei sicuro di voler eliminare questo utente?');">
+                                    <i class="fas fa-trash"></i> Elimina
+                                </a>
+                            {% else %}
+                                <small class="text-muted">Sessione attiva</small>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

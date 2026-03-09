@@ -5,6 +5,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
 from .forms import UserProfiloForm
 from django.contrib.auth import logout
+from django.shortcuts import get_object_or_404
 
 from .models import Profilo
 
@@ -17,6 +18,8 @@ def login_view(request):
         if user:
             login(request, user)
             ente = user.profilo.ente
+            if ente == 'ADMIN':
+                return redirect('admin_dashboard')
             if ente == 'AATO':
                 return redirect('aato')
             elif ente == 'TEA':
@@ -55,4 +58,18 @@ def registra_utente(request):
         form = UserProfiloForm()
     return render(request, 'accounts/registrazione.html', {'form': form})
 
+@login_required
+def admin_dashboard(request):
+    # Solo chi ha l'ente ADMIN può accedere
+    if request.user.profilo.ente != 'ADMIN':
+        return redirect('login')
+    
+    utenti = User.objects.all().select_related('profilo')
+    return render(request, 'accounts/admin_dashboard.html', {'utenti': utenti})
 
+@login_required
+def elimina_utente(request, user_id):
+    if request.user.profilo.ente == 'ADMIN':
+        utente_da_eliminare = get_object_or_404(User, id=user_id)
+        utente_da_eliminare.delete() # Elimina User e Profilo associato
+    return redirect('admin_dashboard')
