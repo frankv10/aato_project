@@ -345,49 +345,70 @@ def ricerca_interventi(request):
 # --- FUNZIONE ESPORTA EXCEL ---
 @login_required
 def export_manufatti(request):
-    # 1. Recupera tutti i dati
     manufatti = Manufatto.objects.all().select_related('info_idriche', 'info_geografiche')
     data = []
 
     for m in manufatti:
-        # Recupera le istanze collegate (se esistono)
         idr = getattr(m, 'info_idriche', None)
         geo = getattr(m, 'info_geografiche', None)
 
+        # Creiamo il formato "lat, lon" come richiesto dall'importatore
+        coord_string = ""
+        if geo and geo.latitudine and geo.longitudine:
+            coord_string = f"{geo.latitudine}, {geo.longitudine}"
+
         row = {
-            # Dati Manufatto
-            'NOME': m.nome,
-            'STATO': m.stato,
-            'COMUNE': m.comune,
-            'LOCALITA': m.localita,
-            'UBICAZIONE': m.ubicazione,
-            'DEPURATORE': m.depuratore_associato,
-            'EMISSARIO': m.recapito_emissario,
-            'TIPOLOGIA': m.tipologia_sfioratore,
+            # Usiamo i nomi esatti che la funzione import_manufatti si aspetta (minuscoli o come cercati)
+            'codice': m.nome,
+            'comune': m.comune,
+            'localita': m.localita,
+            'ubicazione': m.ubicazione,
+            'depuratore associato': m.depuratore_associato,
+            'recapito emissario': m.recapito_emissario,
+            'tipo': m.tipologia_sfioratore,
+            'coordinate': coord_string,
 
-            # Dati Geografici
-            'LATITUDINE': geo.latitudine if geo else None,
-            'LONGITUDINE': geo.longitudine if geo else None,
-
-            # Dati Idrici (Principali)
-            'AE_TOT': idr.ae_tot if idr else None,
-            'QNM': idr.qnm if idr else None,
-            'QS': idr.qs if idr else None,
-            'AE_CIV': idr.ae_civ if idr else None,
-            'AE_IND': idr.ae_ind if idr else None,
-            'CONFORME': idr.e_conforme if idr else None,
-            
-            # Autorizzazioni
-            'VASCA_PTUA': idr.vasca_ptua if idr else None,
-            'CONSORZIO': idr.consorzio_competente if idr else None,
-            'ATTO_PROVINCIA': idr.atto_provincia_n if idr else None,
-            'SCADENZA_PROV': idr.scadenza_autorizzazione if idr else None,
-            'ATTO_CONSORZIO': idr.atto_consorzio_n if idr else None,
-            'SCADENZA_CONS': idr.scadenza_concessione if idr else None,
-            'NOTE_AUTORIZZAZIONI': idr.note_autorizzazioni if idr else None,
+            # Dati Idrici con nomi compatibili
+            'ae civ': idr.ae_civ if idr else 0,
+            'ae ind': idr.ae_ind if idr else 0,
+            'ae tot': idr.ae_tot if idr else 0,
+            'q civ': idr.q_civ if idr else 0,
+            'q ind': idr.q_ind if idr else 0,
+            'qnm': idr.qnm if idr else 0,
+            'qs': idr.qs if idr else 0,
+            'pavv': idr.pavv if idr else 0,
+            'qs/qnm': idr.qs_qnm_ratio if idr else "-",
+            'qs > pavv': idr.qs_gt_pavv if idr else "-",
+            'qs/pavv': idr.qs_pavv_ratio if idr else "-",
+            'tipologia': idr.tipologia_sfioro_rr6 if idr else "",
+            'è conforme?': idr.e_conforme if idr else "",
+            'vasca reg. regionale': idr.vasca_reg_regionale if idr else "",
+            'bacino proprio (ha)': idr.bacino_proprio_ha if idr else 0,
+            'q meteo in ingresso al manufatto (l/s)': idr.q_meteo_ingresso_ls if idr else 0,
+            'q limite ingresso al manufatto (l/s)': idr.q_limite_ingresso_ls if idr else 0,
+            'manufatto limitante': idr.manufatto_limitante if idr else "",
+            'portata specifica allo scarico [l/s haimp]': idr.portata_specifica_scarico if idr else 0,
+            'ha imp': idr.ha_imp if idr else 0,
+            'qscolmata l/s': idr.qscolmata_ls if idr else 0,
+            'vasca ptua': idr.vasca_ptua if idr else "",
+            'scadenza autorizzazione provincia': idr.scadenza_autorizzazione if idr else "",
+            'atto provincia n°': idr.atto_provincia_n if idr else "",
+            'consorzio competente': idr.consorzio_competente if idr else "",
+            'scadenza concessione consorzio': idr.scadenza_concessione if idr else "",
+            'atto consorzio n°': idr.atto_consorzio_n if idr else "",
+            'note autorizzazioni /concessioni': idr.note_autorizzazioni if idr else "",
         }
         data.append(row)
 
+    df = pd.DataFrame(data)
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename=export_manufatti.xlsx'
+    
+    # IMPORTANTE: Nominiamo il foglio 'Riassuntiva' perché l'importatore lo cerca per nome
+    with pd.ExcelWriter(response, engine='openpyxl') as writer:
+        df.to_excel(writer, index=False, sheet_name='Riassuntiva')
+    
+    return response
     # 2. Crea il DataFrame e il file Excel
     df = pd.DataFrame(data)
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
