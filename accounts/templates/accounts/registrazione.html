@@ -2,7 +2,14 @@
 {% load static %}
 
 {% block back_button %}
-<a href="#" onclick="history.back();" class="btn-back" title="Torna indietro">&#8592;</a>
+<div class="nav-top-buttons">
+    <a href="#" onclick="history.back();" class="btn-back" title="Torna indietro">
+        <i class="fas fa-arrow-left"></i>
+    </a>
+    <a href="{% url 'login' %}" class="btn-home-top" title="Torna alla Home">
+        <i class="fas fa-home"></i>
+    </a>
+</div>
 {% endblock %}
 
 {% block title %}Registrazione{% endblock %}
@@ -32,11 +39,21 @@
             {{ form.ente.label_tag }}
             {{ form.ente }}
         </div>
-        <button type="submit" class="btn btn-primary">Registrati</button>
+        <button type="submit" class="btn btn-primary mb-3">Registrati</button>
     </form>
+
+    <div class="text-center border-top pt-3 mt-2">
+        <a href="{% url 'login' %}" class="text-decoration-none text-secondary small me-3">
+            <i class="fas fa-home me-1"></i>Torna alla Home
+        </a>
+        <a href="#" onclick="history.back();" class="text-decoration-none text-secondary small">
+            <i class="fas fa-undo me-1"></i>Annulla
+        </a>
+    </div>
 </div>
 
 <style>
+    /* Box principale */
     .register-box {
         max-width: 500px;
         margin: 40px auto;
@@ -51,49 +68,58 @@
         text-align: center;
         font-size: 2.2em;
         margin-bottom: 25px;
+        color: #333;
     }
 
+    /* Input stilosi */
     input[type="text"],
     input[type="password"],
     select,
     textarea {
-        border-radius: 30px;
+        border-radius: 30px !important;
         border: 1px solid #ccc;
         padding: 10px 20px;
         transition: all 0.3s ease;
-        box-shadow: none;
     }
 
-    input[type="text"]:focus,
-    input[type="password"]:focus,
-    select:focus,
-    textarea:focus {
-        outline: none;
-        border-color: #005bff;
-        box-shadow: 0 0 5px rgba(0, 91, 255, 0.3);
-    }
-
+    /* Pulsante Registrati */
     .btn-primary {
         width: 100%;
         border-radius: 30px;
         padding: 10px;
+        font-weight: bold;
+        text-transform: uppercase;
     }
 
-    /* questo stile viene usato nella barra rossa */
-    .btn-back {
+    /* Gestione pulsanti in alto (Barra rossa) */
+    .nav-top-buttons {
         position: absolute;
         left: 15px;
         top: 50%;
         transform: translateY(-50%);
+        display: flex;
+        gap: 10px;
+    }
+
+    .btn-back, .btn-home-top {
         background: white;
         border: none;
-        font-size: 1.5rem;
-        padding: 5px 12px;
+        width: 38px;
+        height: 38px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         border-radius: 50%;
         text-decoration: none;
         color: #c40000;
         font-weight: bold;
-        box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        transition: transform 0.2s;
+    }
+
+    .btn-back:hover, .btn-home-top:hover {
+        transform: scale(1.1);
+        color: #c40000;
     }
 
     @keyframes slideInDown {
