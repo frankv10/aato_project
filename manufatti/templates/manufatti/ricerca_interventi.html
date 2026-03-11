@@ -41,13 +41,15 @@
     {% for m in risultati %}
     <div class="col-12 mb-2">
       <div class="card border-0 shadow-sm hover-shadow transition-all" 
-           style="border-radius: 10px; border-left: 5px solid {% if m.stato == 'IN ESECUZIONE' %}#198754{% else %}#0dcaf0{% endif %};">
+           style="border-radius: 10px; border-left: 5px solid {% if m.stato == 'IN ESECUZIONE' or m.stato == 'IN ESERCIZIO' %}#198754{% else %}#0dcaf0{% endif %};">
         <div class="card-body p-2 px-3">
           <div class="row align-items-center">
             <div class="col-md-6">
               <div class="d-flex align-items-center">
-                <h6 class="mb-0 fw-bold me-2"><a href="{% url 'dettaglio_manufatto' m.id %}" class="text-dark text-decoration-none">{{ m.nome }}</a></h6>
-                <span class="badge {% if m.stato == 'IN ESECUZIONE' %}bg-success{% else %}bg-info text-dark{% endif %} rounded-pill" style="font-size: 0.65rem;">
+                <h6 class="mb-0 fw-bold me-2">
+                    <a href="{% url 'dettaglio_manufatto' m.id %}" class="text-dark text-decoration-none">{{ m.nome }}</a>
+                </h6>
+                <span class="badge {% if m.stato == 'IN ESECUZIONE' or m.stato == 'IN ESERCIZIO' %}bg-success{% else %}bg-info text-dark{% endif %} rounded-pill" style="font-size: 0.65rem;">
                   {{ m.stato }}
                 </span>
               </div>
@@ -61,6 +63,6 @@
       </div>
     </div>
     {% endfor %}
-  </div>
+</div>
 </div>
 {% endblock %}

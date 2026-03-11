@@ -316,7 +316,7 @@ def ricerca_interventi(request):
     comune_sel = request.GET.get('comune', '')
 
     # Queryset base
-    risultati = Manufatto.objects.all().order_by('-data_creazione')
+    risultati = Manufatto.objects.all().order_by('nome')
 
     # Applicazione filtri
     if query:
