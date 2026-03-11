@@ -72,7 +72,7 @@ def lista_manufatti(request):
     depuratore_selezionato = request.GET.get('depuratore', '')
 
     # 2. Queryset base
-    manufatti = Manufatto.objects.all()
+    manufatti = Manufatto.objects.all().order_by('comune', 'nome')
 
     # 3. Applicazione Filtri
     if query:
@@ -316,8 +316,7 @@ def ricerca_interventi(request):
     comune_sel = request.GET.get('comune', '')
 
     # Queryset base
-    risultati = Manufatto.objects.all().order_by('nome')
-
+    risultati = Manufatto.objects.all().order_by('comune', 'nome')
     # Applicazione filtri
     if query:
         risultati = risultati.filter(nome__icontains=query)

@@ -21,12 +21,12 @@
               {% endfor %}
             </select>
           </div>
-          <div class="col-md-3">
+         <div class="col-md-3">
             <label class="small fw-bold text-muted ps-2">Stato</label>
             <select name="stato" class="form-select form-select-sm rounded-pill">
               <option value="">Tutti gli stati</option>
+              <option value="IN ESERCIZIO" {% if stato == "IN ESERCIZIO" %}selected{% endif %}>IN ESERCIZIO</option>
               <option value="PROGRAMMATO" {% if stato == "PROGRAMMATO" %}selected{% endif %}>PROGRAMMATO</option>
-              <option value="IN ESECUZIONE" {% if stato == "IN ESECUZIONE" %}selected{% endif %}>IN ESECUZIONE</option>
             </select>
           </div>
           <div class="col-md-2">

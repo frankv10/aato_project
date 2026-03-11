@@ -8,6 +8,7 @@ class Manufatto(models.Model):
         max_length=50, 
         choices=[
                 ('IN ESERCIZIO', 'IN ESERCIZIO'),
+                ('PROGRAMMATO', 'PROGRAMMATO'),
         ],
         default='IN ESERCIZIO'
     )
@@ -19,6 +20,10 @@ class Manufatto(models.Model):
     depuratore_associato = models.CharField(max_length=255, null=True, blank=True)
     recapito_emissario = models.CharField(max_length=255, null=True, blank=True)
     tipologia_sfioratore = models.CharField(max_length=100, null=True, blank=True)
+
+    class Meta:
+        # Questo garantisce che ogni query sia ordinata per Comune e poi per Nome
+        ordering = ['comune', 'nome']
 
     def __str__(self):
         return self.nome
