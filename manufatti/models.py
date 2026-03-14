@@ -48,7 +48,6 @@ class info_idriche(models.Model):
     bacino_proprio_ha = models.FloatField(null=True, blank=True)
     q_meteo_ingresso_ls = models.FloatField(null=True, blank=True)
     q_limite_ingresso_ls = models.FloatField(null=True, blank=True)
-    manufatto_limitante = models.CharField(max_length=100, null=True, blank=True)
     portata_specifica_scarico = models.FloatField(null=True, blank=True)
     ha_imp = models.FloatField(null=True, blank=True)
     qscolmata_ls = models.FloatField(null=True, blank=True)
@@ -59,6 +58,14 @@ class info_idriche(models.Model):
     scadenza_concessione = models.CharField(max_length=100, null=True, blank=True)
     atto_consorzio_n = models.CharField(max_length=100, null=True, blank=True)
     note_autorizzazioni = models.TextField(null=True, blank=True)
+    # nuove
+    codice_provincia_manufatto = models.CharField(max_length=100, null=True, blank=True)
+    codice_provincia_scarico = models.CharField(max_length=100, null=True, blank=True)
+    bacino_maggiore_10000 = models.CharField(max_length=10, null=True, blank=True)
+    qs_maggiore_20 = models.CharField(max_length=10, null=True, blank=True)
+    scarica_lago_suolo = models.CharField(max_length=100, null=True, blank=True)
+    manufatto_limitante = models.CharField(max_length=255, null=True, blank=True)
+  
 
 class info_geografiche(models.Model):
     manufatto = models.OneToOneField('Manufatto', on_delete=models.CASCADE, related_name='info_geografiche')

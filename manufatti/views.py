@@ -420,13 +420,18 @@ def export_manufatti(request):
 # --- FUNZIONE IMPORTA EXCEL ---
 
 # 1. FUNZIONE PER CONVERTIRE IN NUMERO IN MODO SICURO
-def safe_float(value):
+def clean_float(value):
+    """Converte errori Excel (#DIV/0!), NaN o stringhe sporche in un numero o None."""
+    if pd.isna(value):
+        return None
+    val_str = str(value).strip().lower()
+    if val_str in ['#div/0!', 'nan', 'inf', '-inf', '', 'none']:
+        return None
     try:
-        if pd.isna(value) or str(value).strip().lower() in ['', 'nan', 'none', '-']:
-            return 0.0
-        return float(str(value).replace(',', '.'))
+        # Gestisce anche il caso in cui il numero sia scritto con la virgola (es: 10,5)
+        return float(val_str.replace(',', '.'))
     except (ValueError, TypeError):
-        return 0.0
+        return None
 
 def clean_ratio(val):
     try:
@@ -489,37 +494,53 @@ def import_manufatti(request):
                     else: count_updated += 1
 
                     # 2. Aggiorna o crea Info Idriche
+                    # 2. Aggiorna o crea Info Idriche
+                    # views.py - Sostituisci il blocco info_idriche con questo:
+
                     info_idriche.objects.update_or_create(
                         manufatto=manufatto,
                         defaults={
-                            'ae_civ': safe_float(row.get('ae civ')),
-                            'ae_ind': safe_float(row.get('ae ind')),
-                            'ae_tot': safe_float(row.get('ae tot')),
-                            'q_civ': safe_float(row.get('q civ')),
-                            'q_ind': safe_float(row.get('q ind')),
-                            'qnm': safe_float(row.get('qnm')),
-                            'qs': safe_float(row.get('qs')),
-                            'pavv': safe_float(row.get('pavv')),
-                            'qs_qnm_ratio': clean_ratio(row.get('qs/qnm')),
-                            'qs_gt_pavv': str(row.get('qs > pavv', '-')),
-                            'qs_pavv_ratio': clean_ratio(row.get('qs/pavv')),
+                            # CAMPI NUMERICI (Unità di misura incluse e tutto in MINUSCOLO)
+                            'ae_civ': clean_float(row.get('ae civ')),
+                            'ae_ind': clean_float(row.get('ae ind')),
+                            'ae_tot': clean_float(row.get('ae tot')),
+                            
+                            # Portate: devono avere [l/s] perché così sono scritte nell'Excel
+                            'q_civ': clean_float(row.get('q civ [l/s]')),
+                            'q_ind': clean_float(row.get('q ind [l/s]')),
+                            'qnm': clean_float(row.get('qnm [l/s]')),
+                            'qs': clean_float(row.get('qs [l/s]')),
+                            'pavv': clean_float(row.get('pavv [l/s]')),
+                            
+                            'bacino_proprio_ha': clean_float(row.get('bacino proprio (ha)')),
+                            'q_meteo_ingresso_ls': clean_float(row.get('q meteo in ingresso al manufatto (l/s)')),
+                            'q_limite_ingresso_ls': clean_float(row.get('q limite ingresso al manufatto (l/s)')),
+                            'portata_specifica_scarico': clean_float(row.get('portata specifica allo scarico [l/s haimp]')),
+                            'ha_imp': clean_float(row.get('sup imp [ha]')),
+                            'qscolmata_ls': clean_float(row.get('qscolmata [l/s]')),
+
+                            # CAMPI TESTUALI (Nomi minuscoli come da trasformazione Pandas)
+                            'qs_qnm_ratio': row.get('qs/qnm'),
+                            'qs_gt_pavv': row.get('qs > pavv'),
+                            'qs_pavv_ratio': row.get('qs/pavv'),
                             'tipologia_sfioro_rr6': row.get('tipologia'),
                             'e_conforme': row.get('è conforme?'),
-                            'vasca_reg_regionale': row.get('vasca reg. regionale'),
-                            'bacino_proprio_ha': safe_float(row.get('bacino proprio (ha)')),
-                            'q_meteo_ingresso_ls': safe_float(row.get('q meteo in ingresso al manufatto (l/s)')),
-                            'q_limite_ingresso_ls': safe_float(row.get('q limite ingresso al manufatto (l/s)')),
-                            'manufatto_limitante': row.get('manufatto limitante'),
-                            'portata_specifica_scarico': safe_float(row.get('portata specifica allo scarico [l/s haimp]')),
-                            'ha_imp': safe_float(row.get('ha imp')),
-                            'qscolmata_ls': safe_float(row.get('qscolmata l/s')),
+                            'vasca_reg_regionale': row.get('vasca rr'),
                             'vasca_ptua': row.get('vasca ptua'),
-                            'scadenza_autorizzazione': str(row.get('scadenza autorizzazione provincia', '')),
-                            'atto_provincia_n': str(row.get('atto provincia n°', '')),
+                            'scadenza_autorizzazione': row.get('scadenza autorizzazione provincia'),
+                            'atto_provincia_n': row.get('atto provincia n° '),
                             'consorzio_competente': row.get('consorzio competente'),
-                            'scadenza_concessione': str(row.get('scadenza concessione consorzio', '')),
-                            'atto_consorzio_n': str(row.get('atto consorzio n°', '')),
-                            'note_autorizzazioni': row.get('note autorizzazioni /concessioni')
+                            'scadenza_concessione': row.get('scadenza concessione consorzio'),
+                            'atto_consorzio_n': row.get('atto consorzio n°'),
+                            'note_autorizzazioni': row.get('note aut./conc.'),
+                            
+                            # NUOVI CAMPI
+                            'codice_provincia_manufatto': row.get('cod prov manufa sf'),
+                            'codice_provincia_scarico': row.get('cod prov scarico sf'),
+                            'bacino_maggiore_10000': row.get("10'000 ae"),
+                            'qs_maggiore_20': row.get('qs>20'),
+                            'scarica_lago_suolo': row.get('scarica a lago o suolo?'),
+                            'manufatto_limitante': row.get('manufatto limitante'),
                         }
                     )
 
