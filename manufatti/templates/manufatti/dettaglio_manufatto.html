@@ -167,10 +167,10 @@
                         <div class="col-md-6 border-end">
                             <div class="data-row"><span>Tipologia Sfioro:</span> <strong>{{ manufatto.info_idriche.tipologia_sfioro_rr6|default:"-" }}</strong></div>
                             <div class="data-row"><span>Vasca Reg. Regionale:</span> <strong>{{ manufatto.info_idriche.vasca_reg_regionale|default:"-" }}</strong></div>
-                            <div class="data-row bg-light p-1 rounded">
-                                <span>Sistema Rilevamento Auto.:</span> 
-                                <strong class="text-primary">{{ manufatto.info_idriche.sistema_rilevamento|default:"NO" }}</strong>
-                            </div>
+                            <div class="data-row"> 
+                            <span>Sistema Rilevamento Auto:</span> 
+                            <strong class="text-primary">{{ manufatto.info_idriche.sistema_rilevamento|default:"NO" }}</strong>
+                        </div>
                             <div class="data-row"><span>Bacino Proprio (ha):</span> <strong>{{ manufatto.info_idriche.bacino_proprio_ha|floatformat:2|default:"0.00" }}</strong></div>
                             <div class="data-row"><span>Sup imp[ha]:</span> <strong>{{ manufatto.info_idriche.ha_imp|floatformat:2|default:"0.00" }}</strong></div>
                         </div>
