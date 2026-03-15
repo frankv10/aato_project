@@ -496,7 +496,12 @@ def import_manufatti(request):
                     # 2. Aggiorna o crea Info Idriche
                     # 2. Aggiorna o crea Info Idriche
                     # views.py - Sostituisci il blocco info_idriche con questo:
-
+                    def find_in_row(row, keys):
+                        for k in keys:
+                            val = row.get(k.lower().strip())
+                            if val is not None:
+                                return val
+                        return None
                     info_idriche.objects.update_or_create(
                         manufatto=manufatto,
                         defaults={
@@ -528,12 +533,14 @@ def import_manufatti(request):
                             'vasca_reg_regionale': row.get('vasca rr'),
                             'vasca_ptua': row.get('vasca ptua'),
                             'scadenza_autorizzazione': row.get('scadenza autorizzazione provincia'),
-                            'atto_provincia_n': row.get('atto provincia n° '),
-                            'consorzio_competente': row.get('consorzio competente'),
-                            'scadenza_concessione': row.get('scadenza concessione consorzio'),
+                            'atto_provincia_n': find_in_row(row, ['atto provincia n°', 'atto provincia n', 'atto provincia']),
+                            'consorzio_competente': find_in_row(row, ['consorzio competente', 'consorzio']),
+                            'scadenza_autorizzazione': row.get('scadenza autorizzazione provincia'),
                             'atto_consorzio_n': row.get('atto consorzio n°'),
                             'note_autorizzazioni': row.get('note aut./conc.'),
-                            
+                            'sistema_rilevamento': str(row.get('rilevamento', '')).strip().upper(),
+                            'scadenza_concessione': row.get('scadenza concessione consorzio'),
+                            'note_autorizzazioni': "" if str(row.get('note aut./conc.')).lower() == 'nan' else row.get('note aut./conc.'),
                             # NUOVI CAMPI
                             'codice_provincia_manufatto': row.get('cod prov manufa sf'),
                             'codice_provincia_scarico': row.get('cod prov scarico sf'),

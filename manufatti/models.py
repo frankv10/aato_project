@@ -65,6 +65,7 @@ class info_idriche(models.Model):
     qs_maggiore_20 = models.CharField(max_length=10, null=True, blank=True)
     scarica_lago_suolo = models.CharField(max_length=100, null=True, blank=True)
     manufatto_limitante = models.CharField(max_length=255, null=True, blank=True)
+    sistema_rilevamento = models.CharField(max_length=10, null=True, blank=True, verbose_name="Sistema Rilevamento")
   
 
 class info_geografiche(models.Model):

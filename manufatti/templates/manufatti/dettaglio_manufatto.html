@@ -6,9 +6,14 @@
     
     <div class="d-flex justify-content-between align-items-center mb-2 border-bottom pb-2 bg-white p-3 rounded-3 shadow-sm">
         <div>
-            <h2 class="text-primary fw-bold mb-0" style="font-size: 1.75rem;">
-                <i class="fas fa-tint me-2"></i>{{ manufatto.nome }}
-            </h2>
+            <div class="d-flex align-items-center mb-1">
+                <h2 class="text-primary fw-bold mb-0 me-3" style="font-size: 1.75rem;">
+                    <i class="fas fa-tint me-2"></i>{{ manufatto.nome }}
+                </h2>
+                <span class="badge {% if manufatto.stato == 'IN ESERCIZIO' %}bg-success{% else %}bg-info{% endif %} shadow-sm">
+                    {{ manufatto.stato }}
+                </span>
+            </div>
             <p class="text-muted mb-0 small">
                 <i class="fas fa-map-marker-alt"></i> {{ manufatto.comune|default:"-" }} - {{ manufatto.localita|default:"-" }}
             </p>
@@ -28,6 +33,8 @@
                 </div>
                 <div class="card-body py-2">
                     <div class="data-row-v"><label>Ubicazione</label><span>{{ manufatto.ubicazione|default:"-" }}</span></div>
+                    <div class="data-row-v"><label>Recapito Emissario</label><span class="text-dark fw-bold">{{ manufatto.recapito_emissario|default:"-" }}</span></div>
+                    
                     <div class="row mb-2">
                         <div class="col-6 border-end">
                              <div class="data-row-v"><label>Cod. Prov. Man.</label><span class="small fw-bold">{{ manufatto.info_idriche.codice_provincia_manufatto|default:"-" }}</span></div>
@@ -44,12 +51,12 @@
                     
                     <h6 class="small fw-bold text-uppercase text-muted mb-2">Coordinate GPS</h6>
                     {% if manufatto.info_geografiche.latitudine and manufatto.info_geografiche.longitudine %}
-                        <div class="data-row"><span>Latitudine:</span> <strong>{{ manufatto.info_geografiche.latitudine }}</strong></div>
-                        <div class="data-row"><span>Longitudine:</span> <strong>{{ manufatto.info_geografiche.longitudine }}</strong></div>
+                        <div class="data-row"><span>Latitudine:</span> <strong>{{ manufatto.info_geografiche.latitudine|floatformat:6 }}</strong></div>
+                        <div class="data-row"><span>Longitudine:</span> <strong>{{ manufatto.info_geografiche.longitudine|floatformat:6 }}</strong></div>
                         <div class="d-grid mt-2">
                             <a href="https://www.google.com/maps?q={{ manufatto.info_geografiche.latitudine }},{{ manufatto.info_geografiche.longitudine }}" 
                                target="_blank" class="btn btn-primary btn-sm rounded-pill fw-bold shadow-sm">
-                                <i class="fas fa-map-marked-alt me-2"></i>VEDI SU GOOGLE MAPS
+                                 <i class="fas fa-map-marked-alt me-2"></i>VEDI SU GOOGLE MAPS
                             </a>
                         </div>
                     {% else %}
@@ -71,11 +78,18 @@
                     <div class="p-2 bg-light rounded border mb-2">
                         <small class="text-muted fw-bold">CONSORZIO</small>
                         <div class="data-row"><span>Ente:</span> <strong>{{ manufatto.info_idriche.consorzio_competente|default:"-" }}</strong></div>
+                        <div class="data-row"><span>Atto:</span> <strong>{{ manufatto.info_idriche.atto_consorzio_n|default:"-" }}</strong></div>
                         <div class="data-row"><span>Scadenza:</span> <strong>{{ manufatto.info_idriche.scadenza_concessione|default:"-" }}</strong></div>
                     </div>
                     <div class="data-row-v">
                         <label>Note AUT./CONC.</label>
-                        <small class="text-muted">{{ manufatto.info_idriche.note_autorizzazioni|default:"-" }}</small>
+                        <small class="text-muted">
+                            {% if manufatto.info_idriche.note_autorizzazioni and manufatto.info_idriche.note_autorizzazioni|lower != 'nan' %}
+                                {{ manufatto.info_idriche.note_autorizzazioni }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </small>
                     </div>
                 </div>
             </div>
@@ -99,16 +113,16 @@
                     <div class="row">
                         <div class="col-md-6 border-end">
                             <p class="text-primary small fw-bold text-uppercase mb-1">Abitanti Equivalenti (AE)</p>
-                            <div class="data-row"><span>AE Civili:</span> <strong>{{ manufatto.info_idriche.ae_civ|floatformat:1|default:"0.0" }}</strong></div>
-                            <div class="data-row"><span>AE Industriali:</span> <strong>{{ manufatto.info_idriche.ae_ind|floatformat:1|default:"0.0" }}</strong></div>
-                            <div class="data-row border-top pt-1"><span>AE Totali:</span> <strong class="text-primary">{{ manufatto.info_idriche.ae_tot|floatformat:1|default:"0.0" }}</strong></div>
+                            <div class="data-row"><span>AE Civili:</span> <strong>{{ manufatto.info_idriche.ae_civ|floatformat:2|default:"0.00" }}</strong></div>
+                            <div class="data-row"><span>AE Industriali:</span> <strong>{{ manufatto.info_idriche.ae_ind|floatformat:2|default:"0.00" }}</strong></div>
+                            <div class="data-row border-top pt-1"><span>AE Totali:</span> <strong class="text-primary">{{ manufatto.info_idriche.ae_tot|floatformat:2|default:"0.00" }}</strong></div>
                             <div class="data-row mt-1"><span>Bacino > 10.000 AE:</span> <span class="badge {% if manufatto.info_idriche.bacino_maggiore_10000 == 'SI' %}bg-warning text-dark{% else %}bg-light text-muted{% endif %}">{{ manufatto.info_idriche.bacino_maggiore_10000|default:"NO" }}</span></div>
                         </div>
                         <div class="col-md-6 ps-4">
                             <p class="text-primary small fw-bold text-uppercase mb-1">Portate (l/s)</p>
-                            <div class="data-row"><span>Q Civ:</span> <strong>{{ manufatto.info_idriche.q_civ|floatformat:3|default:"0.000" }}</strong></div>
-                            <div class="data-row"><span>Q Ind:</span> <strong>{{ manufatto.info_idriche.q_ind|floatformat:3|default:"0.000" }}</strong></div>
-                            <div class="data-row"><span>Qnm:</span> <strong class="text-info">{{ manufatto.info_idriche.qnm|floatformat:3|default:"0.000" }}</strong></div>
+                            <div class="data-row"><span>Q Civ:</span> <strong>{{ manufatto.info_idriche.q_civ|floatformat:2|default:"0.00" }}</strong></div>
+                            <div class="data-row"><span>Q Ind:</span> <strong>{{ manufatto.info_idriche.q_ind|floatformat:2|default:"0.00" }}</strong></div>
+                            <div class="data-row"><span>Qnm:</span> <strong class="text-info">{{ manufatto.info_idriche.qnm|floatformat:2|default:"0.00" }}</strong></div>
                         </div>
                     </div>
                 </div>
@@ -123,13 +137,17 @@
                         <div class="col-md-6 border-end">
                             <div class="data-row"><span>Qs (l/s):</span> <strong>{{ manufatto.info_idriche.qs|floatformat:2|default:"0.00" }}</strong></div>
                             <div class="data-row"><span>Pavv (l/s):</span> <strong>{{ manufatto.info_idriche.pavv|floatformat:2|default:"0.00" }}</strong></div>
-                            <div class="data-row"><span>Qs / Qnm:</span> <strong>{{ manufatto.info_idriche.qs_qnm_ratio|floatformat:2|default:"-" }}</strong></div>
+                            <div class="data-row">
+                                <span>Qs / Qnm:</span> 
+                                <strong>{% if manufatto.info_idriche.qs_qnm_ratio|lower != 'nan' %}{{ manufatto.info_idriche.qs_qnm_ratio|floatformat:2|default:"-" }}{% else %}-{% endif %}</strong>
+                            </div>
                             <div class="data-row"><span>Qs > 20 l/s:</span> <strong class="{% if manufatto.info_idriche.qs_maggiore_20 == 'SI' %}text-danger{% endif %}">{{ manufatto.info_idriche.qs_maggiore_20|default:"NO" }}</strong></div>
                         </div>
                         <div class="col-md-6 ps-4">
                             <div class="data-row"><span>Qs > Pavv:</span> <strong>{{ manufatto.info_idriche.qs_gt_pavv|default:"-" }}</strong></div>
                             <div class="data-row mt-1 bg-warning bg-opacity-10 p-1 rounded border border-warning border-opacity-25">
-                                <span>Qs / Pavv (Ratio):</span> <strong class="text-danger">{{ manufatto.info_idriche.qs_pavv_ratio|floatformat:2|default:"-" }}</strong>
+                                <span>Qs / Pavv (Ratio):</span> 
+                                <strong class="text-danger">{% if manufatto.info_idriche.qs_pavv_ratio|lower != 'nan' %}{{ manufatto.info_idriche.qs_pavv_ratio|floatformat:2|default:"-" }}{% else %}-{% endif %}</strong>
                             </div>
                             <div class="data-row">
                                 <span>Manufatto Limitante:</span> 
@@ -149,13 +167,17 @@
                         <div class="col-md-6 border-end">
                             <div class="data-row"><span>Tipologia Sfioro:</span> <strong>{{ manufatto.info_idriche.tipologia_sfioro_rr6|default:"-" }}</strong></div>
                             <div class="data-row"><span>Vasca Reg. Regionale:</span> <strong>{{ manufatto.info_idriche.vasca_reg_regionale|default:"-" }}</strong></div>
-                            <div class="data-row"><span>Bacino Proprio (ha):</span> <strong>{{ manufatto.info_idriche.bacino_proprio_ha|floatformat:2|default:"-" }}</strong></div>
+                            <div class="data-row bg-light p-1 rounded">
+                                <span>Sistema Rilevamento Auto.:</span> 
+                                <strong class="text-primary">{{ manufatto.info_idriche.sistema_rilevamento|default:"NO" }}</strong>
+                            </div>
+                            <div class="data-row"><span>Bacino Proprio (ha):</span> <strong>{{ manufatto.info_idriche.bacino_proprio_ha|floatformat:2|default:"0.00" }}</strong></div>
                             <div class="data-row"><span>Sup imp[ha]:</span> <strong>{{ manufatto.info_idriche.ha_imp|floatformat:2|default:"0.00" }}</strong></div>
                         </div>
                         <div class="col-md-6 ps-4">
                             <div class="data-row bg-info bg-opacity-10 p-1 rounded mb-1">
                                 <span>Q Limite Ingresso (l/s):</span> 
-                                <strong class="text-dark">{{ manufatto.info_idriche.q_limite_ingresso_ls|floatformat:2|default:"-" }}</strong>
+                                <strong class="text-dark">{{ manufatto.info_idriche.q_limite_ingresso_ls|floatformat:2|default:"0.00" }}</strong>
                             </div>
                             <div class="data-row"><span>Portata Specifica:</span> <strong>{{ manufatto.info_idriche.portata_specifica_scarico|floatformat:2|default:"0.00" }}</strong></div>
                             <div class="data-row"><span>Q Scolmata (l/s):</span> <strong class="text-info">{{ manufatto.info_idriche.qscolmata_ls|floatformat:2|default:"0.00" }}</strong></div>
