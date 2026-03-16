@@ -3,6 +3,7 @@ from django.db import models
 
 
 class Manufatto(models.Model):
+    alert_messaggio = models.TextField(null=True, blank=True) # Campo per memorizzare variazioni dagli Excel
     nome = models.CharField(max_length=100, unique=True)
     stato = models.CharField(
         max_length=50, 

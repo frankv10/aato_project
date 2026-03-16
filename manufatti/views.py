@@ -295,6 +295,13 @@ def elimina_documento(request, doc_id):
     # Django DEVE comunque ricevere un redirect.
     return redirect('lista_documenti')
 
+@login_required
+def risolvi_alert(request, manufatto_id):
+    manufatto = get_object_or_404(Manufatto, id=manufatto_id)
+    manufatto.alert_messaggio = None  # Cancella il messaggio
+    manufatto.save()
+    messages.success(request, f"Alert rimosso per {manufatto.nome}.")
+    return redirect('dettaglio_manufatto', manufatto_id=manufatto.id)
 
 @login_required
 def scarica_documento(request, doc_id):
@@ -463,10 +470,12 @@ def import_manufatti(request):
         excel_file = request.FILES['myfile']
         try:
             xls = pd.ExcelFile(excel_file)
+            # Cerca il foglio che contiene 'riassuntiva' nel nome
             target_sheet = next((s for s in xls.sheet_names if 'riassuntiva' in s.lower()), xls.sheet_names[0])
             df_raw = pd.read_excel(excel_file, sheet_name=target_sheet, header=None)
             
             df_finale = None
+            # Cerca la riga di intestazione che contiene la parola 'codice'
             for i in range(min(100, len(df_raw))):
                 row_values = [str(val).lower().strip() for val in df_raw.iloc[i].values]
                 if 'codice' in row_values:
@@ -479,44 +488,59 @@ def import_manufatti(request):
                 count_created = 0
                 count_updated = 0
                 
+                # Funzione interna per cercare colonne con nomi simili
+                def find_in_row(row, keys):
+                    for k in keys:
+                        val = row.get(k.lower().strip())
+                        if val is not None and str(val).lower() != 'nan': 
+                            return str(val).strip()
+                    return None
+
                 for _, row in df_finale.iterrows():
                     codice = str(row.get('codice', '')).strip()
                     if not codice or codice == 'nan': 
                         continue
 
-                    # --- LOGICA STATO: SOLO COLONNA 'Note' ---
-                    testo_note = str(row.get('note', '')).lower()
-                    if 'dismesso' in testo_note:
-                        stato_calcolato = 'DISMESSO'
-                    else:
-                        stato_calcolato = 'IN ESERCIZIO'
-
                     codici_presenti_nel_file.append(codice)
 
-                    # 1. Manufatto base
-                    manufatto, created = Manufatto.objects.update_or_create(
-                        nome=codice,
-                        defaults={
-                            'stato': stato_calcolato,
-                            'comune': row.get('comune'),
-                            'localita': row.get('localita'),
-                            'ubicazione': row.get('ubicazione'),
-                            'depuratore_associato': row.get('depuratore associato'),
-                            'recapito_emissario': row.get('recapito emissario'),
-                            'tipologia_sfioratore': row.get('tipo')
-                        }
-                    )
+                    # --- 1. RECUPERO DATI PER CONFRONTO ---
+                    nuovo_atto_prov = find_in_row(row, ['atto provincia n°', 'atto provincia n', 'atto provincia'])
+                    nuovo_atto_cons = find_in_row(row, ['atto consorzio n°', 'atto consorzio n', 'atto consorzio'])
                     
+                    # Logica Stato (SOLO colonna Note)
+                    testo_note = str(row.get('note', '')).lower()
+                    stato_calcolato = 'DISMESSO' if 'dismesso' in testo_note else 'IN ESERCIZIO'
+
+                    # --- 2. GESTIONE ALERT E SALVATAGGIO MANUFATTO ---
+                    manufatto, created = Manufatto.objects.get_or_create(nome=codice)
+                    alert_testo = ""
+
+                    if not created:
+                        idriche_vecchie = getattr(manufatto, 'info_idriche', None)
+                        if idriche_vecchie:
+                            # Confronto Provincia
+                            if idriche_vecchie.atto_provincia_n and nuovo_atto_prov and idriche_vecchie.atto_provincia_n != nuovo_atto_prov:
+                                alert_testo += f"⚠️ Cambio Atto Provincia: da {idriche_vecchie.atto_provincia_n} a {nuovo_atto_prov}. "
+                            
+                            # Confronto Consorzio
+                            if idriche_vecchie.atto_consorzio_n and nuovo_atto_cons and idriche_vecchie.atto_consorzio_n != nuovo_atto_cons:
+                                alert_testo += f"⚠️ Cambio Atto Consorzio: da {idriche_vecchie.atto_consorzio_n} a {nuovo_atto_cons}. "
+
+                    # Aggiorna campi base Manufatto
+                    manufatto.stato = stato_calcolato
+                    manufatto.comune = row.get('comune')
+                    manufatto.localita = row.get('localita')
+                    manufatto.ubicazione = row.get('ubicazione')
+                    manufatto.depuratore_associato = row.get('depuratore associato')
+                    manufatto.recapito_emissario = row.get('recapito emissario')
+                    manufatto.tipologia_sfioratore = row.get('tipo')
+                    manufatto.alert_messaggio = alert_testo if alert_testo else None # Salva l'alert nel DB
+                    manufatto.save()
+
                     if created: count_created += 1
                     else: count_updated += 1
 
-                    # 2. Info Idriche (RIMOSSI vasca_ptua e note_autorizzazioni)
-                    def find_in_row(row, keys):
-                        for k in keys:
-                            val = row.get(k.lower().strip())
-                            if val is not None: return val
-                        return None
-
+                    # --- 3. AGGIORNAMENTO INFO IDRICHE (Senza PTUA e Note) ---
                     info_idriche.objects.update_or_create(
                         manufatto=manufatto,
                         defaults={
@@ -541,9 +565,9 @@ def import_manufatti(request):
                             'e_conforme': row.get('è conforme?'),
                             'vasca_reg_regionale': row.get('vasca rr'),
                             'scadenza_autorizzazione': row.get('scadenza autorizzazione provincia'),
-                            'atto_provincia_n': find_in_row(row, ['atto provincia n°', 'atto provincia n', 'atto provincia']),
+                            'atto_provincia_n': nuovo_atto_prov,
                             'consorzio_competente': find_in_row(row, ['consorzio competente', 'consorzio']),
-                            'atto_consorzio_n': row.get('atto consorzio n°'),
+                            'atto_consorzio_n': nuovo_atto_cons,
                             'sistema_rilevamento': str(row.get('rilevamento', '')).strip().upper(),
                             'scadenza_concessione': row.get('scadenza concessione consorzio'),
                             'codice_provincia_manufatto': row.get('cod prov manufa sf'),
@@ -555,7 +579,7 @@ def import_manufatti(request):
                         }
                     )
 
-                    # 3. Coordinate GPS
+                    # --- 4. COORDINATE GPS ---
                     coord_raw = str(row.get('coordinate', '')).strip()
                     if coord_raw and ',' in coord_raw and coord_raw != 'nan':
                         try:
@@ -569,12 +593,14 @@ def import_manufatti(request):
                             )
                         except: pass
 
-                # Sincronizzazione eliminazione
+                # --- 5. RIMOZIONE MANUFATTI NON PRESENTI ---
                 Manufatto.objects.exclude(nome__in=codici_presenti_nel_file).delete()
 
-                messages.success(request, f"Importazione completata con successo.")
+                messages.success(request, f"Importazione riuscita. Creati: {count_created}, Aggiornati: {count_updated}.")
                 return redirect('lista_manufatti')
+                
         except Exception as e:
-            messages.error(request, f"Errore: {str(e)}")
+            messages.error(request, f"Errore durante l'importazione: {str(e)}")
+            
         return redirect('lista_manufatti')
     return render(request, 'manufatti/upload_excel.html')

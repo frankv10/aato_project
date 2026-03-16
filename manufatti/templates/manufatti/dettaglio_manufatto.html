@@ -25,6 +25,22 @@
         </div>
     </div>
 
+    {% if manufatto.alert_messaggio %}
+    <div class="alert alert-warning shadow-sm border-start border-4 border-warning mb-4 animate__animated animate__shakeX d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center">
+            <i class="fas fa-exclamation-triangle fa-2x me-3 text-warning"></i>
+            <div>
+                <h5 class="alert-heading mb-1 fw-bold">Attenzione: Rilevata Variazione Atto</h5>
+                <p class="mb-0">{{ manufatto.alert_messaggio }}</p>
+                <small class="text-muted">Verificare i documenti ufficiali prima di confermare.</small>
+            </div>
+        </div>
+        <a href="{% url 'risolvi_alert' manufatto.id %}" class="btn btn-sm btn-dark rounded-pill px-3 fw-bold">
+            <i class="fas fa-check-circle me-1"></i> Segna come Verificato
+        </a>
+    </div>
+    {% endif %}
+
     <div class="row g-3">
         <div class="col-md-4">
             <div class="card shadow-sm border-0 rounded-3 mb-3">
@@ -179,6 +195,8 @@
         </div>
     </div>
 </div>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
 
 <style>
     .data-row { display: flex; justify-content: space-between; border-bottom: 1px dashed #eee; padding: 0.3rem 0; font-size: 0.88rem; color: #333; }

@@ -15,6 +15,7 @@ urlpatterns = [
     path('ricerca/', views.ricerca_interventi, name='ricerca_interventi'),
     path('export/', views.export_manufatti, name='export_manufatti'),
     path('import/', views.import_manufatti, name='import_manufatti'),
+    path('manufatto/<int:manufatto_id>/risolvi-alert/', views.risolvi_alert, name='risolvi_alert'),
 
     # --- RIGHE RIMOSSE ---
     # Le seguenti righe sono state rimosse per evitare l'errore "pagina bianca"
