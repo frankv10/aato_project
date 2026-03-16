@@ -10,7 +10,7 @@
                 <h2 class="text-primary fw-bold mb-0 me-3" style="font-size: 1.75rem;">
                     <i class="fas fa-tint me-2"></i>{{ manufatto.nome }}
                 </h2>
-                <span class="badge {% if manufatto.stato == 'IN ESERCIZIO' %}bg-success{% else %}bg-info{% endif %} shadow-sm">
+                <span class="badge {% if manufatto.stato == 'DISMESSO' %}bg-danger{% else %}bg-success{% endif %} shadow-sm">
                     {{ manufatto.stato }}
                 </span>
             </div>
@@ -80,16 +80,6 @@
                         <div class="data-row"><span>Ente:</span> <strong>{{ manufatto.info_idriche.consorzio_competente|default:"-" }}</strong></div>
                         <div class="data-row"><span>Atto:</span> <strong>{{ manufatto.info_idriche.atto_consorzio_n|default:"-" }}</strong></div>
                         <div class="data-row"><span>Scadenza:</span> <strong>{{ manufatto.info_idriche.scadenza_concessione|default:"-" }}</strong></div>
-                    </div>
-                    <div class="data-row-v">
-                        <label>Note AUT./CONC.</label>
-                        <small class="text-muted">
-                            {% if manufatto.info_idriche.note_autorizzazioni and manufatto.info_idriche.note_autorizzazioni|lower != 'nan' %}
-                                {{ manufatto.info_idriche.note_autorizzazioni }}
-                            {% else %}
-                                -
-                            {% endif %}
-                        </small>
                     </div>
                 </div>
             </div>
@@ -181,7 +171,6 @@
                             </div>
                             <div class="data-row"><span>Portata Specifica:</span> <strong>{{ manufatto.info_idriche.portata_specifica_scarico|floatformat:2|default:"0.00" }}</strong></div>
                             <div class="data-row"><span>Q Scolmata (l/s):</span> <strong>{{ manufatto.info_idriche.qscolmata_ls|floatformat:2|default:"0.00" }}</strong></div>
-                            <div class="data-row"><span>Vasca PTUA:</span> <strong>{{ manufatto.info_idriche.vasca_ptua|default:"-" }}</strong></div>
                             <div class="data-row"><span>Q Meteo Ingresso:</span> <strong>{{ manufatto.info_idriche.q_meteo_ingresso_ls|floatformat:2|default:"0.00" }}</strong></div>
                         </div>
                     </div>

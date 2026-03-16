@@ -8,7 +8,7 @@ class Manufatto(models.Model):
         max_length=50, 
         choices=[
                 ('IN ESERCIZIO', 'IN ESERCIZIO'),
-                ('PROGRAMMATO', 'PROGRAMMATO'),
+                ('DISMESSO', 'DISMESSO'),
         ],
         default='IN ESERCIZIO'
     )

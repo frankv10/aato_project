@@ -47,6 +47,8 @@ class DocumentoForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields['manufatto'].empty_label = "Nessun manufatto (documento generale)"
         self.fields['manufatto'].label = "Associa a un manufatto (opzionale)"
+        # Forza l'attributo multiple qui per evitare il ValueError di sistema
+        self.fields['file'].widget.attrs.update({'multiple': True})
 
     class Meta:
         model = Documento
@@ -54,5 +56,5 @@ class DocumentoForm(forms.ModelForm):
         widgets = {
             'manufatto': forms.Select(attrs={'class': 'form-select'}),
             'titolo': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Titolo del documento'}),
-            'file': forms.FileInput(attrs={'class': 'form-control'}),
+            'file': forms.FileInput(attrs={'class': 'form-control'}), # Rimosso 'multiple' da qui
         }

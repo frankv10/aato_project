@@ -12,7 +12,7 @@
 
             <div class="card mb-4 shadow-sm">
                 <div class="card-header bg-dark text-white">
-                    <h5 class="mb-0"><i class="fas fa-upload me-2"></i>Carica un nuovo documento</h5>
+                    <h5 class="mb-0"><i class="fas fa-upload me-2"></i>Carica nuovi documenti</h5>
                 </div>
                 <div class="card-body">
                     <form method="post" enctype="multipart/form-data">
@@ -20,16 +20,18 @@
                         <div class="mb-3">
                             <label for="id_titolo" class="form-label">Titolo:</label>
                             {{ form.titolo }}
+                            <small class="text-muted">Se caricati più file, lascia vuoto per usare i nomi originali.</small>
                         </div>
                         <div class="mb-3">
-                            <label for="id_file" class="form-label">File:</label>
+                            <label for="id_file" class="form-label">File (selezionabili multipli):</label>
                             {{ form.file }}
                         </div>
-                        <button type="submit" class="btn btn-primary"><i class="fas fa-check me-2"></i>Carica</button>
+                        <button type="submit" class="btn btn-primary rounded-pill px-4 shadow-sm">
+                            <i class="fas fa-check me-2"></i>Carica
+                        </button>
                     </form>
                 </div>
             </div>
-
 
             <div class="card shadow-sm">
                 <div class="card-header bg-secondary text-white">
@@ -46,15 +48,17 @@
                                         <br>
                                         <small class="text-muted">Caricato il: {{ doc.data_caricamento|date:"d/m/Y H:i" }}</small>
                                     </div>
-                                    <a href="{% url 'scarica_documento' doc.id %}" class="btn btn-outline-info btn-sm" target="_blank">
-                                        <i class="fas fa-download me-1"></i>Scarica
-                                    </a>
-                                    <form method="post" action="{% url 'elimina_documento' doc.id %}" style="display:inline;">
-                                        {% csrf_token %}
-                                        <button type="submit" class="btn btn-outline-danger btn-sm" onclick="return confirm('Sei sicuro di voler eliminare questo documento?')">
-                                            <i class="fas fa-trash me-1"></i>Elimina
-                                        </button>
-                                    </form>
+                                    <div class="d-flex align-items-center">
+                                        <a href="{% url 'scarica_documento' doc.id %}" class="btn btn-success btn-sm rounded-pill me-2 px-3 fw-bold" target="_blank">
+                                            <i class="fas fa-download me-1"></i>Scarica
+                                        </a>
+                                        <form method="post" action="{% url 'elimina_documento' doc.id %}" style="display:inline;">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill" onclick="return confirm('Sei sicuro di voler eliminare questo documento?')">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
                                 </li>
                             {% endfor %}
                         </ul>
@@ -65,13 +69,12 @@
             </div>
 
             <div class="text-center mt-4 d-flex justify-content-between">
-                 <a href="{% url 'dettaglio_manufatto' manufatto.id %}" class="btn btn-light border"><i class="fas fa-arrow-left me-2"></i>Torna al Dettaglio</a>
+                 <a href="{% url 'dettaglio_manufatto' manufatto.id %}" class="btn btn-light border rounded-pill"><i class="fas fa-arrow-left me-2"></i>Torna al Dettaglio</a>
 
-                 {% comment %} Logica dinamica per tornare alla Home AATO/TEA {% endcomment %}
                  {% if ente_utente == 'AATO' %}
-                    <a href="{% url 'aato' %}" class="btn btn-outline-primary"><i class="fas fa-home me-2"></i>Torna alla home AATO</a>
+                    <a href="{% url 'aato' %}" class="btn btn-outline-primary rounded-pill"><i class="fas fa-home me-2"></i>Home AATO</a>
                  {% else %}
-                    <a href="{% url 'tea' %}" class="btn btn-outline-primary"><i class="fas fa-home me-2"></i>Torna alla home TEA</a>
+                    <a href="{% url 'tea' %}" class="btn btn-outline-primary rounded-pill"><i class="fas fa-home me-2"></i>Home TEA</a>
                  {% endif %}
             </div>
         </div>

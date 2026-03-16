@@ -65,7 +65,7 @@
         {% for m in manufatti %}
         <div class="col-12 mb-2">
             <div class="card border-0 shadow-sm hover-shadow transition-all" 
-                 style="border-radius: 10px; border-left: 5px solid {% if m.stato == 'COMPLETATO' or m.stato == 'IN ESECUZIONE' or m.stato == 'IN ESERCIZIO' %}#198754{% else %}#0dcaf0{% endif %};">
+                 style="border-radius: 10px; border-left: 5px solid {% if m.stato == 'DISMESSO' %}#dc3545{% else %}#198754{% endif %};">
                 <div class="card-body p-2 px-3">
                     <div class="row align-items-center">
                         <div class="col-md-4">
@@ -75,7 +75,7 @@
                                         {{ m.nome }}
                                     </a>
                                 </h6>
-                                <span class="badge {% if m.stato == 'COMPLETATO' or m.stato == 'IN ESECUZIONE' or m.stato == 'IN ESERCIZIO' %}bg-success{% else %}bg-info text-dark{% endif %} rounded-pill" style="font-size: 0.65rem;">
+                                <span class="badge {% if m.stato == 'DISMESSO' %}bg-danger{% else %}bg-success{% endif %} rounded-pill" style="font-size: 0.65rem;">
                                     {{ m.stato }}
                                 </span>
                             </div>

@@ -205,16 +205,30 @@ def visualizza_mappa(request):
 def gestione_documenti(request, manufatto_id):
     ente_utente = get_user_ente(request.user)
     manufatto = get_object_or_404(Manufatto, id=manufatto_id)
+    
     if request.method == 'POST':
         form = DocumentoForm(request.POST, request.FILES)
+        # Recuperiamo la lista di tutti i file caricati
+        files = request.FILES.getlist('file')
+        
         if form.is_valid():
-            nuovo_documento = form.save(commit=False)
-            nuovo_documento.manufatto = manufatto
-            nuovo_documento.save()
+            titolo_base = form.cleaned_data.get('titolo')
+            
+            for f in files:
+                # Se l'utente specifica un titolo lo usiamo, altrimenti usiamo il nome del file
+                titolo_finale = titolo_base if titolo_base else f.name
+                Documento.objects.create(
+                    manufatto=manufatto,
+                    titolo=titolo_finale,
+                    file=f
+                )
+            
+            messages.success(request, f"Caricati con successo {len(files)} documenti.")
             return redirect('gestione_documenti', manufatto_id=manufatto.id)
     else:
         form = DocumentoForm()
-    documenti = manufatto.documenti.all()
+        
+    documenti = manufatto.documenti.all().order_by('-data_caricamento')
     context = {
         'manufatto': manufatto,
         'form': form,
@@ -222,7 +236,6 @@ def gestione_documenti(request, manufatto_id):
         'ente_utente': ente_utente
     }
     return render(request, 'manufatti/gestione_documenti.html', context)
-
 
 @login_required
 def lista_documenti(request):
@@ -450,12 +463,10 @@ def import_manufatti(request):
         excel_file = request.FILES['myfile']
         try:
             xls = pd.ExcelFile(excel_file)
-            # Cerca il foglio che contiene 'riassuntiva' nel nome
             target_sheet = next((s for s in xls.sheet_names if 'riassuntiva' in s.lower()), xls.sheet_names[0])
             df_raw = pd.read_excel(excel_file, sheet_name=target_sheet, header=None)
             
             df_finale = None
-            # Cerca la riga di intestazione che contiene la parola 'codice'
             for i in range(min(100, len(df_raw))):
                 row_values = [str(val).lower().strip() for val in df_raw.iloc[i].values]
                 if 'codice' in row_values:
@@ -473,14 +484,20 @@ def import_manufatti(request):
                     if not codice or codice == 'nan': 
                         continue
 
-                    # Teniamo traccia del codice per la sincronizzazione finale
+                    # --- LOGICA STATO: SOLO COLONNA 'Note' ---
+                    testo_note = str(row.get('note', '')).lower()
+                    if 'dismesso' in testo_note:
+                        stato_calcolato = 'DISMESSO'
+                    else:
+                        stato_calcolato = 'IN ESERCIZIO'
+
                     codici_presenti_nel_file.append(codice)
 
-                    # 1. Aggiorna o crea il Manufatto base
+                    # 1. Manufatto base
                     manufatto, created = Manufatto.objects.update_or_create(
                         nome=codice,
                         defaults={
-                            'stato': 'IN ESERCIZIO',
+                            'stato': stato_calcolato,
                             'comune': row.get('comune'),
                             'localita': row.get('localita'),
                             'ubicazione': row.get('ubicazione'),
@@ -493,55 +510,42 @@ def import_manufatti(request):
                     if created: count_created += 1
                     else: count_updated += 1
 
-                    # 2. Aggiorna o crea Info Idriche
-                    # 2. Aggiorna o crea Info Idriche
-                    # views.py - Sostituisci il blocco info_idriche con questo:
+                    # 2. Info Idriche (RIMOSSI vasca_ptua e note_autorizzazioni)
                     def find_in_row(row, keys):
                         for k in keys:
                             val = row.get(k.lower().strip())
-                            if val is not None:
-                                return val
+                            if val is not None: return val
                         return None
+
                     info_idriche.objects.update_or_create(
                         manufatto=manufatto,
                         defaults={
-                            # CAMPI NUMERICI (Unità di misura incluse e tutto in MINUSCOLO)
                             'ae_civ': clean_float(row.get('ae civ')),
                             'ae_ind': clean_float(row.get('ae ind')),
                             'ae_tot': clean_float(row.get('ae tot')),
-                            
-                            # Portate: devono avere [l/s] perché così sono scritte nell'Excel
                             'q_civ': clean_float(row.get('q civ [l/s]')),
                             'q_ind': clean_float(row.get('q ind [l/s]')),
                             'qnm': clean_float(row.get('qnm [l/s]')),
                             'qs': clean_float(row.get('qs [l/s]')),
                             'pavv': clean_float(row.get('pavv [l/s]')),
-                            
                             'bacino_proprio_ha': clean_float(row.get('bacino proprio (ha)')),
                             'q_meteo_ingresso_ls': clean_float(row.get('q meteo in ingresso al manufatto (l/s)')),
                             'q_limite_ingresso_ls': clean_float(row.get('q limite ingresso al manufatto (l/s)')),
                             'portata_specifica_scarico': clean_float(row.get('portata specifica allo scarico [l/s haimp]')),
                             'ha_imp': clean_float(row.get('sup imp [ha]')),
                             'qscolmata_ls': clean_float(row.get('qscolmata [l/s]')),
-
-                            # CAMPI TESTUALI (Nomi minuscoli come da trasformazione Pandas)
                             'qs_qnm_ratio': row.get('qs/qnm'),
                             'qs_gt_pavv': row.get('qs > pavv'),
                             'qs_pavv_ratio': row.get('qs/pavv'),
                             'tipologia_sfioro_rr6': row.get('tipologia'),
                             'e_conforme': row.get('è conforme?'),
                             'vasca_reg_regionale': row.get('vasca rr'),
-                            'vasca_ptua': row.get('vasca ptua'),
                             'scadenza_autorizzazione': row.get('scadenza autorizzazione provincia'),
                             'atto_provincia_n': find_in_row(row, ['atto provincia n°', 'atto provincia n', 'atto provincia']),
                             'consorzio_competente': find_in_row(row, ['consorzio competente', 'consorzio']),
-                            'scadenza_autorizzazione': row.get('scadenza autorizzazione provincia'),
                             'atto_consorzio_n': row.get('atto consorzio n°'),
-                            'note_autorizzazioni': row.get('note aut./conc.'),
                             'sistema_rilevamento': str(row.get('rilevamento', '')).strip().upper(),
                             'scadenza_concessione': row.get('scadenza concessione consorzio'),
-                            'note_autorizzazioni': "" if str(row.get('note aut./conc.')).lower() == 'nan' else row.get('note aut./conc.'),
-                            # NUOVI CAMPI
                             'codice_provincia_manufatto': row.get('cod prov manufa sf'),
                             'codice_provincia_scarico': row.get('cod prov scarico sf'),
                             'bacino_maggiore_10000': row.get("10'000 ae"),
@@ -551,7 +555,7 @@ def import_manufatti(request):
                         }
                     )
 
-                    # 3. Aggiorna o crea Info Geografiche
+                    # 3. Coordinate GPS
                     coord_raw = str(row.get('coordinate', '')).strip()
                     if coord_raw and ',' in coord_raw and coord_raw != 'nan':
                         try:
@@ -565,26 +569,12 @@ def import_manufatti(request):
                             )
                         except: pass
 
-                # --- FASE DI RIMOZIONE MANUFATTI OBSOLETI ---
-                # Eliminiamo tutti i manufatti il cui nome NON è nella lista di quelli appena importati
-                query_eliminazione = Manufatto.objects.exclude(nome__in=codici_presenti_nel_file)
-                count_eliminati = query_eliminazione.count()
-                query_eliminazione.delete()
+                # Sincronizzazione eliminazione
+                Manufatto.objects.exclude(nome__in=codici_presenti_nel_file).delete()
 
-                messages.success(
-                    request, 
-                    f"Importazione completata con successo. "
-                    f"Risultato: {count_created} nuovi, {count_updated} aggiornati. "
-                    f"{count_eliminati} manufatti (non presenti nel file) sono stati rimossi dal database."
-                )
+                messages.success(request, f"Importazione completata con successo.")
                 return redirect('lista_manufatti')
-                
-            else:
-                messages.error(request, "Non è stata trovata la colonna 'Codice' nel file Excel.")
-                
         except Exception as e:
-            messages.error(request, f"Errore durante l'elaborazione del file: {str(e)}")
-            
+            messages.error(request, f"Errore: {str(e)}")
         return redirect('lista_manufatti')
-        
     return render(request, 'manufatti/upload_excel.html')
