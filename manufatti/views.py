@@ -247,9 +247,9 @@ def lista_documenti(request):
         if form.is_valid():
             form.save()
             messages.success(request, 'Documento caricato con successo!')
-            # --- RIGA DA CORREGGERE SOTTO ---
+
             return redirect('lista_documenti') 
-            # -------------------------------
+           
     else:
         form = DocumentoForm()
         

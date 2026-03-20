@@ -17,9 +17,4 @@ urlpatterns = [
     path('import/', views.import_manufatti, name='import_manufatti'),
     path('manufatto/<int:manufatto_id>/risolvi-alert/', views.risolvi_alert, name='risolvi_alert'),
 
-    # --- RIGHE RIMOSSE ---
-    # Le seguenti righe sono state rimosse per evitare l'errore "pagina bianca"
-    # (Usiamo i popup, non pagine separate)
-    # path('modifica_idriche/<int:pk>/', views.modifica_info_idriche, name='modifica_idriche'),
-    # path('modifica_geografiche/<int:pk>/', views.modifica_info_geografiche, name='modifica_geografiche'),
 ]
