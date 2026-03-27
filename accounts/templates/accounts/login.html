@@ -9,85 +9,58 @@
         <i class="fas fa-lock fa-3x text-primary mb-4"></i>
         <h2 class="mb-4">Area Riservata</h2>
 
-        {# Nota: I messaggi ora sono gestiti dal base.html, ma teniamo questo per errori di login rapidi #}
-        {% if messages %}
-            {% for message in messages %}
-                <div class="alert alert-danger rounded-pill py-1"><small>{{ message }}</small></div>
-            {% endfor %}
-        {% endif %}
-
         <form method="post">
             {% csrf_token %}
             <div class="mb-3 text-start">
                 <label class="form-label ps-3"><small>Utente</small></label>
-                <input type="text" name="username" class="form-control rounded-pill px-4" placeholder="Nome utente">
+                <input type="text" name="username" class="form-control rounded-pill px-4" placeholder="Nome utente" required>
             </div>
             <div class="mb-4 text-start">
                 <label class="form-label ps-3"><small>Password</small></label>
                 <div class="input-group">
-                    <input type="password" name="password" id="passwordField" class="form-control rounded-pill-start px-4" placeholder="••••••••">
+                    <input type="password" name="password" id="passwordField" class="form-control rounded-pill-start px-4" placeholder="••••••••" required>
                     <button class="btn btn-outline-secondary rounded-pill-end" type="button" onclick="togglePassword()">
                         <i class="fas fa-eye"></i>
                     </button>
                 </div>
             </div>
+            
             <button type="submit" class="btn btn-primary w-100 rounded-pill py-3 mb-3 shadow-sm fw-bold">Entra nel sistema</button>
 
             <hr class="my-4 opacity-25">
             
-            <p class="text-muted small">Non hai un account?</p>
-            <a href="{% url 'registrazione' %}" class="btn btn-outline-success w-100 rounded-pill py-2 fw-bold">Richiedi Registrazione</a>
+            <p class="text-muted small">Registrazione e Accessi Speciali</p>
+            
+            <a href="{% url 'registrazione' %}" class="btn btn-outline-success w-100 rounded-pill py-2 fw-bold mb-3">Richiedi Registrazione</a>
+
+            <a href="{% url 'admin_login' %}" class="btn btn-dark w-100 rounded-pill py-2 fw-bold" style="background-color: #2c3e50;">
+                <i class="fas fa-user-shield me-2"></i>Accesso Amministratore
+            </a>
         </form>
     </div>
 </div>
 
 <style>
-    .login-container {
-        min-height: 40vh; 
-    }
-
+    .login-container { min-height: 40vh; }
     .login-box {
-        width: 100%;
-        max-width: 420px;
-        background: white;
-        /* --- MODIFICA: Margine ridotto per mostrare i loghi --- */
-        margin-top: -50px; 
-        border-radius: 40px;
+        width: 100%; max-width: 420px; background: white;
+        margin-top: -50px; border-radius: 40px;
         animation: slideInDown 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        position: relative;
-        z-index: 100;
+        position: relative; z-index: 100;
         box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
     }
-
     .rounded-pill-start {
-        border-top-left-radius: 50px !important;
-        border-bottom-left-radius: 50px !important;
-        border-top-right-radius: 0 !important;
-        border-bottom-right-radius: 0 !important;
+        border-top-left-radius: 50px !important; border-bottom-left-radius: 50px !important;
+        border-top-right-radius: 0 !important; border-bottom-right-radius: 0 !important;
     }
-
     .rounded-pill-end {
-        border-top-right-radius: 50px !important;
-        border-bottom-right-radius: 50px !important;
-        border-top-left-radius: 0 !important;
-        border-bottom-left-radius: 0 !important;
+        border-top-right-radius: 50px !important; border-bottom-right-radius: 50px !important;
+        border-top-left-radius: 0 !important; border-bottom-left-radius: 0 !important;
     }
-
     h2 { font-weight: 800; color: #2c3e50; }
-
     @keyframes slideInDown {
         from { transform: translateY(-60px); opacity: 0; }
         to { transform: translateY(0); opacity: 1; }
-    }
-
-    /* Adattamento Mobile */
-    @media (max-width: 576px) {
-        .login-box {
-            margin-top: 10px;
-            margin-left: 15px;
-            margin-right: 15px;
-            padding: 30px 20px !important;
-        }
     }
 </style>
 

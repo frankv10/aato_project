@@ -16,6 +16,6 @@ class UserProfiloForm(forms.Form):
 
     def clean_username(self):
         username = self.cleaned_data['username']
-        if User.objects.filter(username=username).exists():
+        if User.objects.filter(username__iexact=username).exists():
             raise forms.ValidationError("Questo username è già in uso.")
         return username

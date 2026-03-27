@@ -17,28 +17,56 @@
 {% block content %}
 <div class="register-box shadow">
     <h2>Registrazione</h2>
+
+    {% if form.non_field_errors %}
+        <div class="alert alert-danger" style="border-radius: 20px; font-size: 0.9em;">
+            {{ form.non_field_errors }}
+        </div>
+    {% endif %}
+
     <form method="post">
         {% csrf_token %}
+        
         <div class="mb-3">
             {{ form.first_name.label_tag }}
             {{ form.first_name }}
+            {% if form.first_name.errors %}
+                <div class="text-danger small ms-3">{{ form.first_name.errors }}</div>
+            {% endif %}
         </div>
+
         <div class="mb-3">
             {{ form.last_name.label_tag }}
             {{ form.last_name }}
+            {% if form.last_name.errors %}
+                <div class="text-danger small ms-3">{{ form.last_name.errors }}</div>
+            {% endif %}
         </div>
+
         <div class="mb-3">
             {{ form.username.label_tag }}
             {{ form.username }}
+            {% if form.username.errors %}
+                <div class="text-danger small ms-3">{{ form.username.errors }}</div>
+            {% endif %}
         </div>
+
         <div class="mb-3">
             {{ form.password.label_tag }}
             {{ form.password }}
+            {% if form.password.errors %}
+                <div class="text-danger small ms-3">{{ form.password.errors }}</div>
+            {% endif %}
         </div>
+
         <div class="mb-3">
             {{ form.ente.label_tag }}
             {{ form.ente }}
+            {% if form.ente.errors %}
+                <div class="text-danger small ms-3">{{ form.ente.errors }}</div>
+            {% endif %}
         </div>
+
         <button type="submit" class="btn btn-primary mb-3">Registrati</button>
     </form>
 
@@ -53,7 +81,6 @@
 </div>
 
 <style>
-    /* Box principale */
     .register-box {
         max-width: 500px;
         margin: 40px auto;
@@ -71,27 +98,34 @@
         color: #333;
     }
 
-    /* Input stilosi */
     input[type="text"],
     input[type="password"],
-    select,
-    textarea {
+    select {
+        display: block;
+        width: 100%;
         border-radius: 30px !important;
         border: 1px solid #ccc;
         padding: 10px 20px;
         transition: all 0.3s ease;
     }
 
-    /* Pulsante Registrati */
+    /* MODIFICA COLORE TASTO: AZZURRO */
     .btn-primary {
         width: 100%;
         border-radius: 30px;
         padding: 10px;
         font-weight: bold;
         text-transform: uppercase;
+        background-color: #007bff; /* Azzurro brillante */
+        border: none;
+        color: white;
     }
 
-    /* Gestione pulsanti in alto (Barra rossa) */
+    .btn-primary:hover {
+        background-color: #0056b3; /* Blu più intenso al passaggio del mouse */
+        color: white;
+    }
+
     .nav-top-buttons {
         position: absolute;
         left: 15px;
@@ -111,26 +145,20 @@
         justify-content: center;
         border-radius: 50%;
         text-decoration: none;
-        color: #c40000;
-        font-weight: bold;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        color: #c40000; /* Mantenuto rosso come richiesto dallo stile precedente */
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         transition: transform 0.2s;
     }
 
-    .btn-back:hover, .btn-home-top:hover {
-        transform: scale(1.1);
-        color: #c40000;
+    .text-danger.small {
+        color: #dc3545;
+        font-weight: 500;
+        margin-top: 4px;
     }
 
     @keyframes slideInDown {
-        from {
-            transform: translateY(-50px);
-            opacity: 0;
-        }
-        to {
-            transform: translateY(0);
-            opacity: 1;
-        }
+        from { transform: translateY(-50px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
     }
 </style>
 {% endblock %}

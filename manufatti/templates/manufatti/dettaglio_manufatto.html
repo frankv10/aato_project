@@ -155,10 +155,6 @@
                                 <span>Qs / Pavv (Ratio):</span> 
                                 <strong>{% if manufatto.info_idriche.qs_pavv_ratio|lower != 'nan' %}{{ manufatto.info_idriche.qs_pavv_ratio|floatformat:2|default:"-" }}{% else %}-{% endif %}</strong>
                             </div>
-                            <div class="data-row">
-                                <span>Manufatto Limitante:</span> 
-                                <strong class="small text-wrap">{{ manufatto.info_idriche.manufatto_limitante|default:"-" }}</strong>
-                            </div>
                         </div>
                     </div>
                 </div>

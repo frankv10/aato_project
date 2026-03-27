@@ -365,6 +365,7 @@ def ricerca_interventi(request):
 # --- FUNZIONE ESPORTA EXCEL ---
 @login_required
 def export_manufatti(request):
+    # Recupera tutti i manufatti con i relativi dati idrici e geografici per ottimizzare le query
     manufatti = Manufatto.objects.all().select_related('info_idriche', 'info_geografiche')
     data = []
 
@@ -372,13 +373,13 @@ def export_manufatti(request):
         idr = getattr(m, 'info_idriche', None)
         geo = getattr(m, 'info_geografiche', None)
 
-        # Creiamo il formato "lat, lon" come richiesto dall'importatore
+        # Formatta le coordinate come stringa "lat, lon" per la compatibilità con l'importatore
         coord_string = ""
         if geo and geo.latitudine and geo.longitudine:
             coord_string = f"{geo.latitudine}, {geo.longitudine}"
 
+        # Costruisce la riga del file Excel con i nomi colonna attesi
         row = {
-            # Usiamo i nomi esatti che la funzione import_manufatti si aspetta (minuscoli o come cercati)
             'codice': m.nome,
             'comune': m.comune,
             'localita': m.localita,
@@ -388,7 +389,7 @@ def export_manufatti(request):
             'tipo': m.tipologia_sfioratore,
             'coordinate': coord_string,
 
-            # Dati Idrici con nomi compatibili
+            # Dati Idrici
             'ae civ': idr.ae_civ if idr else 0,
             'ae ind': idr.ae_ind if idr else 0,
             'ae tot': idr.ae_tot if idr else 0,
@@ -406,7 +407,6 @@ def export_manufatti(request):
             'bacino proprio (ha)': idr.bacino_proprio_ha if idr else 0,
             'q meteo in ingresso al manufatto (l/s)': idr.q_meteo_ingresso_ls if idr else 0,
             'q limite ingresso al manufatto (l/s)': idr.q_limite_ingresso_ls if idr else 0,
-            'manufatto limitante': idr.manufatto_limitante if idr else "",
             'portata specifica allo scarico [l/s haimp]': idr.portata_specifica_scarico if idr else 0,
             'ha imp': idr.ha_imp if idr else 0,
             'qscolmata l/s': idr.qscolmata_ls if idr else 0,
@@ -417,26 +417,24 @@ def export_manufatti(request):
             'scadenza concessione consorzio': idr.scadenza_concessione if idr else "",
             'atto consorzio n°': idr.atto_consorzio_n if idr else "",
             'note autorizzazioni /concessioni': idr.note_autorizzazioni if idr else "",
+            
+            # Campo specifico per il sistema di rilevamento con il nome colonna corretto
+            "dotazione sistema di rilevamento automatico dell'attivazione": idr.sistema_rilevamento if idr else "NO",
         }
         data.append(row)
 
+    # Crea il DataFrame pandas
     df = pd.DataFrame(data)
+    
+    # Prepara la risposta HTTP come file Excel
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
     response['Content-Disposition'] = 'attachment; filename=export_manufatti.xlsx'
     
-    # IMPORTANTE: Nominiamo il foglio 'Riassuntiva' perché l'importatore lo cerca per nome
+    # Scrive il file Excel rinominando il foglio in 'Riassuntiva' per l'importatore
     with pd.ExcelWriter(response, engine='openpyxl') as writer:
         df.to_excel(writer, index=False, sheet_name='Riassuntiva')
     
     return response
-    # 2. Crea il DataFrame e il file Excel
-    df = pd.DataFrame(data)
-    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-    response['Content-Disposition'] = 'attachment; filename=export_manufatti.xlsx'
-    df.to_excel(response, index=False, engine='openpyxl')
-    
-    return response
-
 # --- FUNZIONE IMPORTA EXCEL ---
 
 # 1. FUNZIONE PER CONVERTIRE IN NUMERO IN MODO SICURO
@@ -518,11 +516,8 @@ def import_manufatti(request):
                     if not created:
                         idriche_vecchie = getattr(manufatto, 'info_idriche', None)
                         if idriche_vecchie:
-                            # Confronto Provincia
                             if idriche_vecchie.atto_provincia_n and nuovo_atto_prov and idriche_vecchie.atto_provincia_n != nuovo_atto_prov:
                                 alert_testo += f"⚠️ Cambio Atto Provincia: da {idriche_vecchie.atto_provincia_n} a {nuovo_atto_prov}. "
-                            
-                            # Confronto Consorzio
                             if idriche_vecchie.atto_consorzio_n and nuovo_atto_cons and idriche_vecchie.atto_consorzio_n != nuovo_atto_cons:
                                 alert_testo += f"⚠️ Cambio Atto Consorzio: da {idriche_vecchie.atto_consorzio_n} a {nuovo_atto_cons}. "
 
@@ -534,13 +529,25 @@ def import_manufatti(request):
                     manufatto.depuratore_associato = row.get('depuratore associato')
                     manufatto.recapito_emissario = row.get('recapito emissario')
                     manufatto.tipologia_sfioratore = row.get('tipo')
-                    manufatto.alert_messaggio = alert_testo if alert_testo else None # Salva l'alert nel DB
+                    manufatto.alert_messaggio = alert_testo if alert_testo else None
                     manufatto.save()
 
                     if created: count_created += 1
                     else: count_updated += 1
 
-                    # --- 3. AGGIORNAMENTO INFO IDRICHE (Senza PTUA e Note) ---
+                    # --- 3. GESTIONE SISTEMA RILEVAMENTO (NORMALIZZAZIONE) ---
+                    # Cerchiamo il valore usando il nome lungo trovato nel tuo file Excel
+                    ril_raw = find_in_row(row, [
+                        "dotazione sistema di rilevamento automatico dell'attivazione",
+                        'sistema rilevamento auto (si/no)', 
+                        'rilevamento', 
+                        'sistema rilevamento auto', 
+                        'rilevamento auto'
+                    ])
+                    # Convertiamo "Si", "Sì", "1" in "SI" e tutto il resto in "NO"
+                    rilevamento_finale = "SI" if str(ril_raw).lower() in ['si', 'sì', 'yes', '1'] else "NO"
+
+                    # --- 4. AGGIORNAMENTO INFO IDRICHE ---
                     info_idriche.objects.update_or_create(
                         manufatto=manufatto,
                         defaults={
@@ -568,18 +575,17 @@ def import_manufatti(request):
                             'atto_provincia_n': nuovo_atto_prov,
                             'consorzio_competente': find_in_row(row, ['consorzio competente', 'consorzio']),
                             'atto_consorzio_n': nuovo_atto_cons,
-                            'sistema_rilevamento': str(row.get('rilevamento', '')).strip().upper(),
+                            'sistema_rilevamento': rilevamento_finale, # Valore normalizzato SI/NO
                             'scadenza_concessione': row.get('scadenza concessione consorzio'),
                             'codice_provincia_manufatto': row.get('cod prov manufa sf'),
                             'codice_provincia_scarico': row.get('cod prov scarico sf'),
                             'bacino_maggiore_10000': row.get("10'000 ae"),
                             'qs_maggiore_20': row.get('qs>20'),
                             'scarica_lago_suolo': row.get('scarica a lago o suolo?'),
-                            'manufatto_limitante': row.get('manufatto limitante'),
                         }
                     )
 
-                    # --- 4. COORDINATE GPS ---
+                    # --- 5. COORDINATE GPS ---
                     coord_raw = str(row.get('coordinate', '')).strip()
                     if coord_raw and ',' in coord_raw and coord_raw != 'nan':
                         try:
@@ -593,7 +599,7 @@ def import_manufatti(request):
                             )
                         except: pass
 
-                # --- 5. RIMOZIONE MANUFATTI NON PRESENTI ---
+                # --- 6. RIMOZIONE MANUFATTI NON PRESENTI ---
                 Manufatto.objects.exclude(nome__in=codici_presenti_nel_file).delete()
 
                 messages.success(request, f"Importazione riuscita. Creati: {count_created}, Aggiornati: {count_updated}.")

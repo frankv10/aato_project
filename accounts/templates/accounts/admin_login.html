@@ -1,0 +1,47 @@
+{% extends "accounts/base.html" %}
+{% load static %}
+
+{% block title %}Accesso Amministratore{% endblock %}
+
+{% block content %}
+<div class="login-container d-flex justify-content-center">
+    <div class="login-box shadow-lg text-center p-5" style="border-top: 5px solid #2c3e50;">
+        <i class="fas fa-user-shield fa-3x text-dark mb-4"></i>
+        <h2 class="mb-4">Pannello Admin</h2>
+
+        <form method="post">
+            {% csrf_token %}
+            <div class="mb-3 text-start">
+                <label class="form-label ps-3"><small>Username Amministratore</small></label>
+                <input type="text" name="username" class="form-control rounded-pill px-4" placeholder="Admin Username" required>
+            </div>
+            <div class="mb-4 text-start">
+                <label class="form-label ps-3"><small>Password</small></label>
+                <input type="password" name="password" class="form-control rounded-pill px-4" placeholder="••••••••" required>
+            </div>
+            
+            <button type="submit" class="btn btn-dark w-100 rounded-pill py-3 mb-3 shadow-sm fw-bold">
+                Accedi alla Dashboard
+            </button>
+
+            <a href="{% url 'login' %}" class="text-decoration-none text-muted small">
+                <i class="fas fa-arrow-left me-1"></i> Torna al Login Utenti
+            </a>
+        </form>
+    </div>
+</div>
+
+<style>
+    /* Uso gli stessi stili del tuo login.html */
+    .login-container { min-height: 45vh; }
+    .login-box {
+        width: 100%; max-width: 420px; background: white;
+        margin-top: -50px; border-radius: 40px;
+        animation: slideInDown 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    @keyframes slideInDown {
+        from { transform: translateY(-60px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+    }
+</style>
+{% endblock %}
